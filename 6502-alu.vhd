@@ -1,0 +1,52 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+ENTITY alu IS
+    PORT (
+        A : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        B : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        ALU_SEL : IN STD_LOGIC_VECTOR(2 DOWNTO 0)
+        CIN : IN STD_LOGIC;
+
+        RESULT : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+        STATUS_FLAGS : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+    );
+END alu;
+
+ARCHITECTURE Behavioral OF alu IS
+    SIGNAL INTER_RESULT : STD_LOGIC_VECTOR(8 DOWNTO 0);
+    SIGNAL R_ADC, R_SBC, R_ASL, R_LSR, R_ROL, R_ROR : STD_LOGIC_VECTOR(8 DOWNTO 0);
+    SIGNAL R_AND, R_ORA, R_EOR : STD_LOGIC_VECTOR(7 DOWNTO 0); 
+BEGIN
+    R_ADC <= A + B + CIN;
+    R_SBC <= A - B - (NOT CIN);
+    R_ASL <= A(7 DOWNTO 0) & '0';
+    R_LSR <= "00" & A(7 DOWNTO 1);
+    R_ROL <= A(7 DOWNTO 1) & CIN;
+    R_ROR <= A(0) & CIN & A(7 DOWNTO 1);
+    R_AND <= A AND B;
+    R_ORA <= A OR B;
+    R_EOR <= A XOR B;
+
+    WITH ALU_SEL SELECT
+        INTER_RESULT <=
+            R_ADC WHEN "000",
+            R_SBC WHEN "001",
+            R_ASL WHEN "010",
+            R_LSR WHEN "011",
+            R_ROL WHEN "100",
+            R_ROR WHEN "101",
+            R_AND WHEN "110",
+            R_ORA WHEN "111",
+            R_EOR WHEN "1000",
+            (OTHERS => '0') WHEN OTHERS;
+
+    RESULT <= INTER_RESULT;
+
+    STATUS_FLAGS(3) <= INTER_RESULT(7);
+    STATUS_FLAGS(2) <= '1' WHEN INTER_RESULT(7 DOWNTO 0) = "00000000" ELSE '0';
+    STATUS_FLAGS(1) <= INTER_RESULT(8);
+    STATUS_FLAGS(0) <= (A(7) XNOR B(7)) AND (A(7) XOR INTER_RESULT(7)) WHEN CONTROL = "000" ELSE
+                       (A(7) XOR B(7)) AND (A(7) XOR INTER_RESULT(7)) WHEN CONTROL = "001" ELSE '0';
+END Behavioral;
