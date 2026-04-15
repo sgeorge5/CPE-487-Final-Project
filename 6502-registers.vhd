@@ -10,7 +10,7 @@ ENTITY register_file IS
         REG_SEL : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 
         ACC, X, Y, SPR, STAT  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-        PC : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+        PC : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
     );
 END register_file;
 
@@ -39,6 +39,4 @@ BEGIN
             END IF;
         END IF;
     END PROCESS;
-
-    ACC <= 
 END Behavioral;
