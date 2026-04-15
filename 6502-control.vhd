@@ -4,24 +4,23 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 ENTITY control IS 
     PORT (
-        READ_WRITE : OUT STD_LOGIC;                     --select read or write mode to addr bus
-        REG_SEL : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);     --select register
-        ALU_SEL : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);     --select ALU operational mode
-        SYNC : OUT STD_LOGIC;                           --SYNC pin high when in FETCH state T0
+        RW  : OUT STD_LOGIC;                        --select read or write mode to addr bus
+        REG_SEL     : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);     --select register
+        ALU_SEL     : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);     --select ALU operational mode
+        SYNC        : OUT STD_LOGIC;                        --SYNC pin high when in FETCH state T0
 
-        RST : IN STD_LOGIC;
-        ADDR_BUS : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);   --16-bit address bus
-        DATA_BUS : IN STD_LOGIC_VECTOR(7 DOWNTO 0);     --8-bit data bus
-        OP : IN STD_LOGIC_VECTOR(7 DOWNTO 0)
+        RST         : IN STD_LOGIC;
+        ADDR_BUS    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);    --16-bit address bus
+        DATA_BUS    : IN STD_LOGIC_VECTOR(7 DOWNTO 0);      --8-bit data bus
     );
 END control;
 
 ARCHITECTURE Behavioral OF control IS
     TYPE STATE IS (T0, T1, T2, T3, T4, T5, T6);
-    SIGNAL PS, NS : STATE;
-    SIGNAL INSTR_REG : STD_LOGIC_VECTOR(7 DOWNTO 0);     --instruction register internal to control logic
-    SIGNAL PC_REG : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    SIGNAL PC_NEXT : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL PS, NS       : STATE;
+    SIGNAL INSTR_REG    : STD_LOGIC_VECTOR(7 DOWNTO 0);     --instruction register internal to control logic
+    SIGNAL PC_REG       : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL PC_NEXT      : STD_LOGIC_VECTOR(15 DOWNTO 0);
 BEGIN
     PROCESS(CLK, RST) IS
     BEGIN
@@ -38,7 +37,7 @@ BEGIN
         END IF
     END PROCESS;
 
-    PROCESS(PS, OP) IS
+    PROCESS(PS, INSTR_REG) IS
     --TODO: add defaults to avoid latching 
     BEGIN
         CASE PS IS
@@ -115,5 +114,4 @@ BEGIN
                 END CASE;
         END CASE;
     END PROCESS;
-
 END Behavioral;
