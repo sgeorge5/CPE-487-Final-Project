@@ -8,6 +8,8 @@ ENTITY control IS
         REG_SEL     : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);     --select register
         ALU_SEL     : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);     --select ALU operational mode
         SYNC        : OUT STD_LOGIC;                        --SYNC pin high when in FETCH state T0
+        ALU_SRC_A   : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+        EN_ALL_FLAGS, EN_NZ_FLAGS, EN_NZC_FLAGS, SET_C, CLR_C, EN_BIT_FLAGS : OUT STD_LOGIC;
 
         RST         : IN STD_LOGIC;
         ADDR_BUS    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);    --16-bit address bus
@@ -52,64 +54,10 @@ BEGIN
                     WHEN X"69" THEN                     --ADC IMM 1/1
                         ADDR_BUS <= PC_REG + 1;
                         ALU_SEL <= "000";
-                        REG_SEL <= "000";
+                        WE_ACC <= '1';
                         READ_WRITE <= '1';
+                        EN_ALL_FLAGS <= '1';
                         PC_NEXT <= PC_REG + 2;
-                        NS <= T0;
-
-                    WHEN X"EA" THEN                     --NOP IMP 1/1
-                        PC_NEXT <= PC_REG + 1;
-                        NS <= T0;
-
-                    WHEN X"A9" THEN                     --LDA IMM 1/1
-                        ADDR_BUS <= PC_REG + 1;
-                        ALU_SEL <= "1001";
-                        REG_SEL <= "000";
-                        READ_WRITE <= '1';
-                        PC_NEXT <= PC_REG + 2;
-                        NS <= T0;
-
-                    WHEN X"A2" THEN                     --LDX IMM 1/1
-                        ADDR_BUS <= PC_REG + 1;
-                        ALU_SEL <= "1001";
-                        REG_SEL <= "001";
-                        READ_WRITE <= '1';
-                        PC_NEXT <= PC_REG + 2;
-                        NS <= T0;
-
-                    WHEN X"A0" THEN                     --LDY IMM 1/1
-                        ADDR_BUS <= PC_REG + 1;
-                        ALU_SEL <= "1001";
-                        REG_SEL <= "010";
-                        READ_WRITE <= '1';
-                        PC_NEXT <= PC_REG + 2;
-                        NS <= T0;
-
-                    WHEN X"E8" THEN                     --INX IMP 1/1
-                        ALU_SEL <= "1010";
-                        REG_SEL <= "001";
-                        READ_WRITE <= '1';
-                        PC_NEXT <= PC_REG + 1;
-                        NS <= T0;
-
-                    WHEN X"C8" THEN                     --INY IMP 1/1
-                        ALU_SEL <= "1010";
-                        REG_SEL <= "010";
-                        READ_WRITE <= '1';
-                        PC_NEXT <= PC_REG + 1;
-                    
-                    WHEN X"4C" THEN                     --JMP ABS 1/2
-                        ADDR_BUS <= PC_REG;
-                        TMP_LOW <= DATA_BUS;
-                        PC_NEXT <= PC_REG + 1;
-                        NS <= T2;
-                END CASE;
-            
-            WHEN T2 =>
-                CASE INSTR_REG IS                       --JMP ABS 2/2
-                    WHEN X"4C" THEN
-                        ADDR_BUS <= PC_REG;
-                        PC_NEXT <= DATA_BUS & TMP_LOW;
                         NS <= T0;
                 END CASE;
         END CASE;
