@@ -14,7 +14,7 @@ architecture rtl of apple1_top is
 
     signal cpu_clk   : std_logic := '0';
     signal cpu_reset : std_logic;
-
+    signal we_sig : std_logic;
     signal addr      : std_logic_vector(15 downto 0);
     signal data_in   : std_logic_vector(7 downto 0);
     signal data_out  : std_logic_vector(7 downto 0);
@@ -26,6 +26,8 @@ begin
     -- Reset (btnC is active LOW on Nexys)
     --------------------------------------------------------------------
     cpu_reset <= not RESET_BTN;
+    we_sig <= not rw;
+
 
     --------------------------------------------------------------------
     -- Clock divider: 100 MHz → 1 MHz
@@ -69,7 +71,7 @@ begin
             addr     => addr,
             data_in  => data_out,
             data_out => data_in,
-            we       => not rw
+            we       => we_sig
         );
 
     --------------------------------------------------------------------
