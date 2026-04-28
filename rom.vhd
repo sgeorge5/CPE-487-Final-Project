@@ -10,8 +10,9 @@ entity rom is
     port (
         clock:    in std_logic;
         address:  in std_logic_vector(7 downto 0); 
-        cs:       in std_logic;
-        data_out: out std_logic_vector(7 downto 0));
+        ce:       in std_logic;
+        data_out: out std_logic_vector(7 downto 0)
+    );
 end entity;
 
 architecture rtl of rom is
@@ -52,16 +53,7 @@ architecture rtl of rom is
         (X"EA"),(X"EA"),(X"00"),(X"0F"),(X"00"),(X"FF"),(X"00"),(X"FF"));
 
 begin
-
-    process(clock)
-    begin
-        if rising_edge(clock) then
-            if cs = '1' then
-                data_out <= rom(to_integer(unsigned(address)));
-            end if;
-        end if;
-    end process;
-
+   data_out <= rom(to_integer(unsigned(address)));
 end architecture;
 
 -- End of file
