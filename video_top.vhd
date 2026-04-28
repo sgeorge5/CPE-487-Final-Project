@@ -120,7 +120,7 @@ begin
     char_rom_inst : char_rom
         port map (
             clk  => clk_pix,
-            addr => vram_char(7 downto 0) & pixel_row(3 downto 0),
+            addr => vram_char(7 downto 0) & pixel_row(2 downto 0),
             data => char_bitmap
         );
 
