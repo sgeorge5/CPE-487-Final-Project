@@ -53,7 +53,12 @@ architecture rtl of rom is
         (X"EA"),(X"EA"),(X"00"),(X"0F"),(X"00"),(X"FF"),(X"00"),(X"FF"));
 
 begin
-   data_out <= rom(to_integer(unsigned(address)));
+    process(clock)
+    begin
+        if ce = '1' then
+            data_out <= rom(to_integer(unsigned(address)));
+        end if;
+    end process;
 end architecture;
 
 -- End of file

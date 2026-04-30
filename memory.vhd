@@ -19,12 +19,13 @@ architecture rtl of memory is
 begin
     process(clk)
     begin
-        if rising_edge(clk) then
-            if we = '1' and ce = '1' then
-                ram(to_integer(unsigned(addr))) <= data_in;
-            elsif ce = '1' then
-                data_out <= ram(to_integer(unsigned(addr)));
+        if ce = '1' then
+            if rising_edge(clk) then
+                if we = '1' then
+                    ram(to_integer(unsigned(addr))) <= data_in;
+                end if;
             end if;
+            data_out <= ram(to_integer(unsigned(addr)));
         end if;
     end process;
 end architecture;
