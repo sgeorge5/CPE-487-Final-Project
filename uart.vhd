@@ -21,16 +21,12 @@ end entity;
 
 architecture rtl of uart is
 
-    --------------------------------------------------------------------
-    -- UART PARAMETERS
-    --------------------------------------------------------------------
+    
     constant CLK_FREQ  : integer := 100_000_000;  -- 100 MHz
     constant BAUD_RATE : integer := 115200;
     constant BAUD_DIV  : integer := CLK_FREQ / BAUD_RATE;
 
-    --------------------------------------------------------------------
-    -- INTERNAL SIGNALS
-    --------------------------------------------------------------------
+ 
     signal baud_cnt : integer range 0 to BAUD_DIV := 0;
     signal baud_tick : std_logic := '0';
 
@@ -48,9 +44,7 @@ architecture rtl of uart is
 
 begin
 
-    --------------------------------------------------------------------
-    -- BAUD RATE GENERATOR
-    --------------------------------------------------------------------
+    
     process(clk)
     begin
         if rising_edge(clk) then
@@ -64,9 +58,7 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------
-    -- UART RX (receive from laptop)
-    --------------------------------------------------------------------
+
     process(clk)
     begin
         if rising_edge(clk) then
@@ -93,9 +85,6 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------
-    -- UART TX (send to laptop)
-    --------------------------------------------------------------------
     process(clk)
     begin
         if rising_edge(clk) then
@@ -122,9 +111,6 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------
-    -- CPU READ INTERFACE
-    --------------------------------------------------------------------
     cpu_din <= rx_data when cpu_addr = x"D010" else
                (7 downto 1 => '0') & rx_ready when cpu_addr = x"D011" else
                (others => '0');
