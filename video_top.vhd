@@ -93,6 +93,7 @@ architecture rtl of video_top is
     signal vram_addr_vga : std_logic_vector(9 downto 0);
     signal vram_char     : std_logic_vector(7 downto 0);
     signal char_bitmap   : std_logic_vector(7 downto 0);
+    signal char_addr : std_logic_vector(10 downto 0);
 
     -- CPU write into video RAM
     signal vram_cs       : std_logic;
@@ -105,6 +106,8 @@ begin
 
     -- CPU reads from video RAM when in that range
     cpu_din <= vram_char when vram_cs = '1' else (others => '0');
+    char_addr <= vram_char(7 downto 0) & pixel_row(2 downto 0);
+
 
     vram_inst : video_ram
         port map (
@@ -120,7 +123,7 @@ begin
     char_rom_inst : char_rom
         port map (
             clk  => clk_pix,
-            addr => vram_char(7 downto 0) & pixel_row(2 downto 0),
+            addr => char_addr,
             data => char_bitmap
         );
 
