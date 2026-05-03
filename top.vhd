@@ -7,42 +7,30 @@ entity apple1_top is
         CLK100MHZ : in  std_logic;
         RESET_BTN : in  std_logic;
         LED       : out std_logic_vector(15 downto 0);
-
-        -- VGA outputs (match your XDC)
         VGA_R     : out std_logic_vector(3 downto 0);
         VGA_G     : out std_logic_vector(3 downto 0);
         VGA_B     : out std_logic_vector(3 downto 0);
         VGA_HS    : out std_logic;
-        VGA_VS    : out std_logic
+        VGA_VS    : out std_logic;
+        UART_RX   : in  std_logic;
+        UART_TX   : out std_logic
     );
 end entity;
 
 architecture rtl of apple1_top is
 
-    --------------------------------------------------------------------
-    -- CPU universal bus
-    --------------------------------------------------------------------
     signal cpu_clk      : std_logic := '0';
     signal cpu_reset    : std_logic := '0';
     signal cpu_addr     : std_logic_vector(15 downto 0);
     signal cpu_din      : std_logic_vector(7 downto 0);
     signal cpu_dout     : std_logic_vector(7 downto 0);
     signal cpu_we       : std_logic;
-    
-    signal mx_rw : std_logic;
-
-    --------------------------------------------------------------------
-    -- RAM / ROM
-    --------------------------------------------------------------------
-    signal ram_data_out : std_logic_vector(7 downto 0);
-    signal ram_ce       : std_logic;
-
-    signal rom_data_out : std_logic_vector(7 downto 0);
-    signal rom_ce       : std_logic;
-
-    --------------------------------------------------------------------
-    -- COMPONENT DECLARATIONS
-    --------------------------------------------------------------------
+    signal mx_rw        : std_logic;
+    signal ram_data_out  : std_logic_vector(7 downto 0);
+    signal ram_ce        : std_logic;
+    signal rom_data_out  : std_logic_vector(7 downto 0);
+    signal rom_ce        : std_logic;
+    signal uart_data_out : std_logic_vector(7 downto 0);
     component mx65 is
         port (
             clock    : in  std_logic;
@@ -57,20 +45,6 @@ architecture rtl of apple1_top is
             irq      : in  std_logic
         );
     end component;
-    
-    component video_ram is
-    port (
-        clk_cpu   : in  std_logic;
-        addr_cpu  : in  std_logic_vector(9 downto 0);
-        data_in   : in  std_logic_vector(7 downto 0);
-        data_out  : out std_logic_vector(7 downto 0);  -- ← add this if missing
-        we        : in  std_logic;
-        clk_vga   : in  std_logic;
-        addr_vga  : in  std_logic_vector(9 downto 0);
-        char_out  : out std_logic_vector(7 downto 0)
-    );
-end component;
-
 
     component memory is
         port (
@@ -111,16 +85,25 @@ end component;
         );
     end component;
 
+    component uart is
+        port (
+            clk       : in  std_logic;
+            reset     : in  std_logic;
+
+            cpu_addr  : in  std_logic_vector(15 downto 0);
+            cpu_din   : out std_logic_vector(7 downto 0);
+            cpu_dout  : in  std_logic_vector(7 downto 0);
+            cpu_we    : in  std_logic;
+
+            rx        : in  std_logic;
+            tx        : out std_logic
+        );
+    end component;
+
 begin
 
-    --------------------------------------------------------------------
-    -- RESET (active low button)
-    --------------------------------------------------------------------
     cpu_reset <= not RESET_BTN;
 
-    --------------------------------------------------------------------
-    -- CPU CLOCK DIVIDER (100 MHz → 1 MHz)
-    --------------------------------------------------------------------
     process(CLK100MHZ)
         variable cnt : integer range 0 to 49 := 0;
     begin
@@ -134,9 +117,6 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------
-    -- CPU
-    --------------------------------------------------------------------
     cpu_we <= not mx_rw;
 
     mx6502 : mx65
@@ -153,9 +133,6 @@ begin
             irq      => '1'
         );
 
-    --------------------------------------------------------------------
-    -- RAM (4 KB)
-    --------------------------------------------------------------------
     ram_ce <= '1' when cpu_addr(15 downto 12) = x"0" else '0';
 
     mem : memory
@@ -168,9 +145,6 @@ begin
             we       => cpu_we
         );
 
-    --------------------------------------------------------------------
-    -- ROM (WOZMON at FF00-FFFF)
-    --------------------------------------------------------------------
     rom_ce <= '1' when cpu_addr(15 downto 8) = x"FF" else '0';
 
     wozrom : rom
@@ -181,26 +155,32 @@ begin
             data_out => rom_data_out
         );
 
-    --------------------------------------------------------------------
-    -- CPU DATA BUS MUX
-    --------------------------------------------------------------------
+    uart_inst : uart
+        port map (
+            clk       => CLK100MHZ,
+            reset     => cpu_reset,
+            cpu_addr  => cpu_addr,
+            cpu_din   => uart_data_out,
+            cpu_dout  => cpu_dout,
+            cpu_we    => cpu_we,
+            rx        => UART_RX,
+            tx        => UART_TX
+        );
     cpu_din <=
-        ram_data_out when ram_ce = '1' else
-        rom_data_out when rom_ce = '1' else
+        ram_data_out  when ram_ce = '1' else
+        rom_data_out  when rom_ce = '1' else
+        uart_data_out when cpu_addr(15 downto 4) = x"D01" else
         (others => '0');
 
-    --------------------------------------------------------------------
-    -- VGA SUBSYSTEM
-    --------------------------------------------------------------------
     video : video_top
         port map (
             clk_cpu  => cpu_clk,
-            clk_pix  => CLK100MHZ,   -- TEMPORARY: replace with PLL later
+            clk_pix  => CLK100MHZ,
             reset    => cpu_reset,
 
             cpu_addr => cpu_addr,
             cpu_dout => cpu_dout,
-            cpu_din  => open,        -- not used yet
+            cpu_din  => open,
             cpu_we   => cpu_we,
 
             vga_hs   => VGA_HS,
@@ -209,11 +189,7 @@ begin
             vga_g    => VGA_G,
             vga_b    => VGA_B
         );
-        
 
-    --------------------------------------------------------------------
-    -- DEBUG: show address on LEDs
-    --------------------------------------------------------------------
     LED <= cpu_addr;
 
 end architecture;
