@@ -1,3 +1,6 @@
+--THE PROBLEM.... IO unit does not remember rising/falling edge transitions... if the PIA is busy writing,
+--store these transitions and handle them later.
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -265,15 +268,11 @@ begin
                             pb_write <= '0';
     
                     end case;
-                end if;
-                if cs = '0' then
-                    desel_pulse <= '1';
+                else
+                    pa_write <= '0';
+                    pb_write <= '0';
                 end if;
 
-                pa_read_d <= pa_read;
-                pb_read_d <= pb_read;
-            elsif falling_edge(clk) then
-    
                 irqa1 <= irqa1_next;
                 irqa2 <= irqa2_next;
         
@@ -283,7 +282,7 @@ begin
                 if cra_reg(5) = '1' then
                     if cra_reg(4) = '0' then
                         if cra_reg(3) = '0' then
-                            if pa_read_d = '1' then
+                            if pa_read = '1' then
                                 ca2 <= '0';
                             elsif ca1_in = '1' AND ca1_prev = '0' AND cra_reg(1) = '1' then
                                 ca2 <= '1';
@@ -293,7 +292,7 @@ begin
                                 ca2 <= ca2;
                             end if;
                         elsif cra_reg(3) = '1' then
-                            ca2 <= pa_read_d;
+                            ca2 <= pa_read;
                         end if;
                     elsif cra_reg(4) = '1' then
                         if cra_reg(3) = '1' then

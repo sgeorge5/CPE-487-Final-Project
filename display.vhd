@@ -1,3 +1,5 @@
+--TODO: add reset states
+
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
@@ -10,6 +12,7 @@ entity crom is
     port (
         clk : in std_logic;
         pixel_clk : in std_logic;
+        rst : in std_logic;
         da : in std_logic; --data available
         rda : out std_logic; --ready data accept
         data_in : in std_logic_vector(6 downto 0); --6 bit ascii value from PIA
@@ -56,35 +59,49 @@ architecture Behavioral of crom is
     signal dbg_crom_col_indx : integer;
     signal dbg_from_row_indx : integer;
     signal dbg_from_col_indx : integer;
+
+    signal rda_s : std_logic := '1'; --signal should default to 1 : start out "waiting" for data
 begin
     --character memory process
-    process (clk)
+    process (da, rst)
     begin
-        if da = '1' then
-            --draw stuff
-            crom(crom_row_index)(crom_col_index) <= data_in;
-
-            if (crom_col_index = 39) then --if out of characters on a line
-                if (crom_row_index = 23) OR screen_full = '1' then --if out of rows
-                    if (top_row_pointer = 23) then
-                        top_row_pointer <= 0;
-                    else
-                        top_row_pointer <= top_row_pointer + 1;
-                    end if;
-                    crom(top_row_pointer) <= (others => (others => '0'));
-                    crom_row_index <= top_row_pointer;
-                    crom_col_index <= 0;
-                    screen_full <= '1';
-                else
-                    crom_row_index <= crom_row_index + 1;
-                    crom_col_index <= 0;
-                end if;
-            else 
-                crom_col_index <= crom_col_index + 1;
-            end if;
-            rda <= '1';
+        if rst = '0' then
+            rda_s <= '1';
+            crom_row_index <= 0;
+            crom_col_index <= 0;
+            top_row_pointer <= 0;
+            screen_full <= '0';
         else
-            rda <= '0';
+            --only sample data when data available signal is high
+            if da = '1' then
+                --draw stuff
+                crom(crom_row_index)(crom_col_index) <= data_in;
+
+                if (crom_col_index = 39) then --if out of characters on a line
+                    if (crom_row_index = 23) OR screen_full = '1' then --if out of rows
+                        if (top_row_pointer = 23) then
+                            top_row_pointer <= 0;
+                        else
+                            top_row_pointer <= top_row_pointer + 1;
+                        end if;
+                        crom(top_row_pointer) <= (others => (others => '0'));
+                        crom_row_index <= top_row_pointer;
+                        crom_col_index <= 0;
+                        screen_full <= '1';
+                    else
+                        crom_row_index <= crom_row_index + 1;
+                        crom_col_index <= 0;
+                    end if;
+                else 
+                    crom_col_index <= crom_col_index + 1;
+                end if;
+
+                --set RDA to 1 when done drawing to effectively set DA to 0
+                rda <= '1';
+            else
+                --set RDA to 0 until the PIA is written to by the CPU to clear CB2 and set DA back to 1
+                rda <= '0';
+            end if;
         end if;
     end process;
 

@@ -1,3 +1,5 @@
+--MAKE ALL RESETS ACTIVE AT 1
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -88,7 +90,7 @@ architecture rtl of apple1_top is
         );
     end component;
     
-    component io is 
+    component pia is 
     port(
         clk : in std_logic; -- essentially the E signal
         rst : in std_logic;
@@ -102,10 +104,12 @@ architecture rtl of apple1_top is
         ca1_in : in std_logic;
         ca2_in : in std_logic;
         ca2_out : out std_logic;
+        ca2_oe : out std_logic;
 
         cb1_in : in std_logic;
         cb2_in : in std_logic;
         cb2_out : out std_logic;
+        cb2_oe : out std_logic;
 
         pa_in : in std_logic_vector(7 downto 0);
         pa_out : out std_logic_vector(7 downto 0);
@@ -191,7 +195,7 @@ begin
     pia : io
         port map (
             clk => univ_clk,
-            rst => '1',
+            rst => mx_reset,
             cs => pia_ce,
 
             rs => pia_rs,
@@ -202,10 +206,12 @@ begin
             ca1_in => pia_ca1_in,
             ca2_in => pia_ca2_in,
             ca2_out => pia_ca2_out,
+            ca2_oe => pia_ca2_oe,
 
             cb1_in => pia_cb1_in,
             cb2_in => pia_cb2_in,
             cb2_out => pia_cb2_out,
+            cb2_oe => pia_ca2_oe,
 
             pa_in => pia_pa_in,
             pa_out => pia_pa_out,
@@ -219,6 +225,12 @@ begin
 
             irqa => pia_irqa,
             irqb => pia_irqb
+        );
+
+    displaycircuit : display
+        port map (
+            clk => univ_clk,
+            pixel_clk
         );
 
     ram_ce <= '1' WHEN univ_addr_bus(15 downto 12) = X"0" else '0';
