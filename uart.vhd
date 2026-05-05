@@ -4,16 +4,19 @@ use ieee.numeric_std.all;
 
 entity uart is
     port (
-        clk       : in  std_logic;                     -- system clock (100 MHz)
+        clk       : in  std_logic;                     -- 100 MHz
         reset     : in  std_logic;
 
-        -- CPU interface
-        cpu_addr  : in  std_logic_vector(15 downto 0);
-        cpu_din   : out std_logic_vector(7 downto 0);
-        cpu_dout  : in  std_logic_vector(7 downto 0);
-        cpu_we    : in  std_logic;
+        -- TX interface
+        tx_start  : in  std_logic;                     -- pulse to start TX
+        tx_data   : in  std_logic_vector(7 downto 0);
+        tx_busy   : out std_logic;
 
-        -- UART pins (to Nexys A7 USB-UART)
+        -- RX interface
+        rx_data   : out std_logic_vector(7 downto 0);
+        rx_ready  : out std_logic;
+
+        -- UART pins
         rx        : in  std_logic;
         tx        : out std_logic
     );
@@ -21,30 +24,34 @@ end entity;
 
 architecture rtl of uart is
 
-    
-    constant CLK_FREQ  : integer := 100_000_000;  -- 100 MHz
+    constant CLK_FREQ  : integer := 100_000_000;
     constant BAUD_RATE : integer := 115200;
-    constant BAUD_DIV  : integer := CLK_FREQ / BAUD_RATE;
+    constant BAUD_DIV  : integer := CLK_FREQ / BAUD_RATE - 1;
 
- 
-    signal baud_cnt : integer range 0 to BAUD_DIV := 0;
+    signal baud_cnt  : integer := 0;
     signal baud_tick : std_logic := '0';
 
-    -- RX signals
-    signal rx_shift : std_logic_vector(9 downto 0) := (others => '1');
-    signal rx_busy  : std_logic := '0';
-    signal rx_bit   : integer range 0 to 9 := 0;
-    signal rx_data  : std_logic_vector(7 downto 0) := (others => '0');
-    signal rx_ready : std_logic := '0';
+    -- RX
+    signal rx_shift  : std_logic_vector(9 downto 0) := (others => '1');
+    signal rx_busy_i : std_logic := '0';
+    signal rx_bit    : integer range 0 to 9 := 0;
+    signal rx_data_i : std_logic_vector(7 downto 0) := (others => '0');
+    signal rx_ready_i: std_logic := '0';
 
-    -- TX signals
-    signal tx_shift : std_logic_vector(9 downto 0) := (others => '1');
-    signal tx_busy  : std_logic := '0';
-    signal tx_bit   : integer range 0 to 9 := 0;
+    -- TX
+    signal tx_shift  : std_logic_vector(9 downto 0) := (others => '1');
+    signal tx_busy_i : std_logic := '0';
+    signal tx_bit    : integer range 0 to 9 := 0;
 
 begin
 
-    
+    tx_busy  <= tx_busy_i;
+    rx_data  <= rx_data_i;
+    rx_ready <= rx_ready_i;
+
+    --------------------------------------------------------------------
+    -- Baud generator
+    --------------------------------------------------------------------
     process(clk)
     begin
         if rising_edge(clk) then
@@ -58,25 +65,30 @@ begin
         end if;
     end process;
 
-
+    --------------------------------------------------------------------
+    -- RX
+    --------------------------------------------------------------------
     process(clk)
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                rx_busy  <= '0';
-                rx_ready <= '0';
+                rx_busy_i  <= '0';
+                rx_ready_i <= '0';
+                rx_bit     <= 0;
             elsif baud_tick = '1' then
-                if rx_busy = '0' then
-                    if rx = '0' then  -- start bit
-                        rx_busy <= '1';
-                        rx_bit  <= 0;
+                rx_ready_i <= '0';
+
+                if rx_busy_i = '0' then
+                    if rx = '0' then
+                        rx_busy_i <= '1';
+                        rx_bit    <= 0;
                     end if;
                 else
                     rx_shift(rx_bit) <= rx;
                     if rx_bit = 9 then
-                        rx_busy  <= '0';
-                        rx_ready <= '1';
-                        rx_data  <= rx_shift(8 downto 1); -- data bits
+                        rx_busy_i  <= '0';
+                        rx_ready_i <= '1';
+                        rx_data_i  <= rx_shift(8 downto 1);
                     else
                         rx_bit <= rx_bit + 1;
                     end if;
@@ -85,24 +97,36 @@ begin
         end if;
     end process;
 
+    --------------------------------------------------------------------
+    -- TX
+    --------------------------------------------------------------------
     process(clk)
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                tx_busy <= '0';
-                tx      <= '1';
+                tx_busy_i <= '0';
+                tx        <= '1';
             elsif baud_tick = '1' then
-                if tx_busy = '0' then
-                    if cpu_we = '1' and cpu_addr = x"D011" then
-                        tx_shift <= '1' & cpu_dout & '0'; -- stop, data, start
-                        tx_busy  <= '1';
-                        tx_bit   <= 0;
+                if tx_busy_i = '0' then
+                    if tx_start = '1' then
+                        tx_shift(0) <= '0';
+                        tx_shift(1) <= tx_data(0);
+                        tx_shift(2) <= tx_data(1);
+                        tx_shift(3) <= tx_data(2);
+                        tx_shift(4) <= tx_data(3);
+                        tx_shift(5) <= tx_data(4);
+                        tx_shift(6) <= tx_data(5);
+                        tx_shift(7) <= tx_data(6);
+                        tx_shift(8) <= tx_data(7);
+                        tx_shift(9) <= '1';
+                        tx_busy_i   <= '1';
+                        tx_bit      <= 0;
                     end if;
                 else
                     tx <= tx_shift(tx_bit);
                     if tx_bit = 9 then
-                        tx_busy <= '0';
-                        tx      <= '1';
+                        tx_busy_i <= '0';
+                        tx        <= '1';
                     else
                         tx_bit <= tx_bit + 1;
                     end if;
@@ -110,9 +134,5 @@ begin
             end if;
         end if;
     end process;
-
-    cpu_din <= rx_data when cpu_addr = x"D010" else
-               (7 downto 1 => '0') & rx_ready when cpu_addr = x"D011" else
-               (others => '0');
 
 end architecture;
