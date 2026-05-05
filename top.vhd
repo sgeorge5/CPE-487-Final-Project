@@ -2,10 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- Vendor primitives for BUFG and MMCM (Vivado 7-series)
-library UNISIM;
-use UNISIM.VComponents.all;
-
 entity apple1_top is
     port (
         CLK100MHZ : in  std_logic;
@@ -28,11 +24,11 @@ architecture rtl of apple1_top is
     --------------------------------------------------------------------
     -- Clocking / reset
     --------------------------------------------------------------------
-    signal cpu_clk      : std_logic := '0';               -- 1 MHz CPU clock (derived)
+    signal cpu_clk      : std_logic := '0';               -- ~1 MHz CPU clock (derived)
     signal cpu_reset    : std_logic := '0';
-    signal clk100_buf   : std_logic;
-    signal clk_pix_buf  : std_logic;                      -- generated pixel clock (40 MHz)
-    signal mmcm_locked  : std_logic;
+
+    -- We'll just use CLK100MHZ directly as the pixel clock
+    signal clk_pix_buf  : std_logic := '0';
 
     --------------------------------------------------------------------
     -- CPU bus
@@ -158,82 +154,7 @@ architecture rtl of apple1_top is
         );
     end component;
 
-    --------------------------------------------------------------------
-    -- MMCM / BUFG primitives (Vivado 7-series)
-    -- Generates 40 MHz pixel clock from 100 MHz input:
-    --   CLKIN1 = 100 MHz, CLKFBOUT_MULT_F = 8.0, CLKOUT0_DIVIDE_F = 20.0 => 100*8/20 = 40 MHz
-    --------------------------------------------------------------------
-    signal clkfb      : std_logic;
-    signal clkfb_buf  : std_logic;
-    signal clk_pix_mmcm : std_logic;
-
 begin
-
-    --------------------------------------------------------------------
-    -- Input clock buffer (BUFG)
-    --------------------------------------------------------------------
-    clk100_bufg : BUFG
-        port map (
-            I => CLK100MHZ,
-            O => clk100_buf
-        );
-
-    --------------------------------------------------------------------
-    -- MMCM instance to generate 40 MHz pixel clock
-    -- Using MMCME2_BASE primitive from UNISIM. RST tied to cpu_reset.
-    -- If your flow prefers the IP wrapper, replace this primitive with the IP core.
-    --------------------------------------------------------------------
-    mmcm_inst : MMCME2_BASE
-        generic map (
-            BANDWIDTH => "OPTIMIZED",
-            CLKFBOUT_MULT_F => 8.0,
-            CLKFBOUT_PHASE => 0.0,
-            CLKIN1_PERIOD => 10.0,
-            CLKOUT0_DIVIDE_F => 20.0,
-            CLKOUT0_PHASE => 0.0,
-            DIVCLK_DIVIDE => 1,
-            CLKOUT0_DUTY_CYCLE => 0.5
-        )
-        port map (
-            CLKIN1 => clk100_buf,
-            CLKFBIN => clkfb_buf,
-            CLKFBOUT => clkfb,
-            CLKOUT0 => clk_pix_mmcm,
-            PWRDWN => '0',
-            RST => cpu_reset,          -- MMCM reset tied to cpu_reset
-            LOCKED => mmcm_locked,
-            -- unused outputs tied off or left open
-            CLKOUT1 => open,
-            CLKOUT2 => open,
-            CLKOUT3 => open,
-            CLKOUT4 => open,
-            CLKOUT5 => open,
-            CLKOUT6 => open,
-            CLKIN2 => '0',
-            CLKFBSTOPPED => open,
-            CLKINSTOPPED => open,
-            DO => open,
-            DRDY => open,
-            DADDR => (others => '0'),
-            DCLK => '0',
-            DEN => '0',
-            DI => (others => '0'),
-            DWE => '0'
-        );
-
-    -- feedback buffer
-    clkfb_bufg : BUFG
-        port map (
-            I => clkfb,
-            O => clkfb_buf
-        );
-
-    -- pixel clock buffer
-    clkpix_bufg : BUFG
-        port map (
-            I => clk_pix_mmcm,
-            O => clk_pix_buf
-        );
 
     --------------------------------------------------------------------
     -- RESET
@@ -241,13 +162,17 @@ begin
     cpu_reset <= not RESET_BTN;
 
     --------------------------------------------------------------------
-    -- CPU CLOCK (100 MHz → 1 MHz)
-    -- simple divide-by-50 toggle to produce ~1 MHz from 100 MHz
+    -- Pixel clock (no MMCM/BUFG: just pass through 100 MHz)
     --------------------------------------------------------------------
-    process(clk100_buf)
+    clk_pix_buf <= CLK100MHZ;
+
+    --------------------------------------------------------------------
+    -- CPU CLOCK (100 MHz → ~1 MHz)
+    --------------------------------------------------------------------
+    process(CLK100MHZ)
         variable cnt : integer range 0 to 49 := 0;
     begin
-        if rising_edge(clk100_buf) then
+        if rising_edge(CLK100MHZ) then
             if cnt = 49 then
                 cnt := 0;
                 cpu_clk <= not cpu_clk;
@@ -328,7 +253,7 @@ begin
         (others => '0');
 
     --------------------------------------------------------------------
-    -- VIDEO TOP (pixel clock from MMCM)
+    -- VIDEO TOP (pixel clock = clk_pix_buf)
     --------------------------------------------------------------------
     video : video_top
         port map (
@@ -353,7 +278,7 @@ begin
     --------------------------------------------------------------------
     uart_inst : uart
         port map (
-            clk       => clk100_buf,
+            clk       => CLK100MHZ,
             reset     => cpu_reset,
 
             tx_start  => uart_tx_start,
@@ -388,7 +313,7 @@ begin
         );
 
     --------------------------------------------------------------------
-    -- DEBUG LEDs (single-driver, non-overlapping)
+    -- DEBUG LEDs
     --------------------------------------------------------------------
     LED(7 downto 0)   <= last_tx_byte;
     LED(15 downto 8)  <= std_logic_vector(tx_write_count(7 downto 0));
