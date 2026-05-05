@@ -1,84 +1,109 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-ENTITY vga_sync IS
-	PORT (
-		pixel_clk : IN STD_LOGIC;
-		red_in    : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		green_in  : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		blue_in   : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		red_out   : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
-		green_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
-		blue_out  : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
-		hsync     : OUT STD_LOGIC;
-		vsync     : OUT STD_LOGIC;
-		pixel_row : OUT STD_LOGIC_VECTOR (10 DOWNTO 0);
-		pixel_col : OUT STD_LOGIC_VECTOR (10 DOWNTO 0)
-	);
-END vga_sync;
+entity vga_sync is
+    port (
+        pixel_clk : in  std_logic;
+        red_in    : in  std_logic_vector(3 downto 0);
+        green_in  : in  std_logic_vector(3 downto 0);
+        blue_in   : in  std_logic_vector(3 downto 0);
+        red_out   : out std_logic_vector(3 downto 0);
+        green_out : out std_logic_vector(3 downto 0);
+        blue_out  : out std_logic_vector(3 downto 0);
+        hsync     : out std_logic;
+        vsync     : out std_logic;
+        pixel_row : out std_logic_vector(10 downto 0);
+        pixel_col : out std_logic_vector(10 downto 0)
+    );
+end entity;
 
-ARCHITECTURE Behavioral OF vga_sync IS
-	SIGNAL h_cnt, v_cnt : STD_LOGIC_VECTOR (10 DOWNTO 0);
+architecture rtl of vga_sync is
 
-    CONSTANT H      : INTEGER := 800;
-    CONSTANT V      : INTEGER := 600;
-    CONSTANT H_FP   : INTEGER := 40;
-    CONSTANT H_BP   : INTEGER := 88;
-    CONSTANT H_SYNC : INTEGER := 128;
-    CONSTANT V_FP   : INTEGER := 1;
-    CONSTANT V_BP   : INTEGER := 23;
-    CONSTANT V_SYNC : INTEGER := 4;
+    -- Timing constants for 800x600@60 (example)
+    constant H_VISIBLE  : integer := 800;
+    constant H_FP       : integer := 40;
+    constant H_SYNC     : integer := 128;
+    constant H_BP       : integer := 88;
+    constant V_VISIBLE  : integer := 600;
+    constant V_FP       : integer := 1;
+    constant V_SYNC     : integer := 4;
+    constant V_BP       : integer := 23;
 
-    CONSTANT FREQ   : INTEGER := 60;
+    constant H_TOTAL : integer := H_VISIBLE + H_FP + H_SYNC + H_BP;
+    constant V_TOTAL : integer := V_VISIBLE + V_FP + V_SYNC + V_BP;
 
-BEGIN
-	sync_pr : PROCESS
-		VARIABLE video_on : STD_LOGIC;
-	BEGIN
-		WAIT UNTIL rising_edge(pixel_clk);
-		-- Generate Horizontal Timing Signals for Video Signal
-        -- total horizontal line width = H + H_FP + H_SYNC + H_BP
-        -- Reset h_cnt when at end of line
-		IF (h_cnt >= H + H_FP + H_SYNC + H_BP - 1) THEN
-			h_cnt <= (others => '0');
-		ELSE
-			h_cnt <= h_cnt + 1;
-		END IF;
-        -- Pull down hsync after front porch
-		IF (h_cnt >= H + H_FP) AND (h_cnt <= H + H_FP + H_SYNC) THEN
-			hsync <= '0';
-		ELSE
-			hsync <= '1';
-		END IF;
+    signal h_cnt : unsigned(11 downto 0) := (others => '0'); -- enough bits for H_TOTAL
+    signal v_cnt : unsigned(11 downto 0) := (others => '0');
 
-		IF (v_cnt >= V + V_FP + V_SYNC + V_BP - 1) AND (h_cnt = H + FREQ - 1) THEN
-			v_cnt <= (others => '0');
-		ELSIF (h_cnt = H + FREQ - 1) THEN
-			v_cnt <= v_cnt + 1;
-		END IF;
-		IF (v_cnt >= V + V_FP) AND (v_cnt <= V + V_FP + V_SYNC) THEN
-			vsync <= '0';
-		ELSE
-			vsync <= '1';
-		END IF;
-		-- Generate Video Signals and Pixel Address
-		IF (h_cnt < H) AND (v_cnt < V) THEN  
-			video_on := '1';
-		ELSE
-			video_on := '0';
-		END IF;
-		pixel_col <= h_cnt;
-		pixel_row <= v_cnt;
-		-- Register video to clock edge and suppress video during blanking and sync periods
-        if video_on = '1' then
-          red_out <= red_in;
-          green_out <= green_in;
-          blue_out <= blue_in;
-        else
-          red_out <= "0000";
-          green_out <= "0000";
-          blue_out <= "0000";
+    signal red_reg   : std_logic_vector(3 downto 0) := (others => '0');
+    signal green_reg : std_logic_vector(3 downto 0) := (others => '0');
+    signal blue_reg  : std_logic_vector(3 downto 0) := (others => '0');
+
+begin
+
+    process(pixel_clk)
+        variable video_on : std_logic;
+    begin
+        if rising_edge(pixel_clk) then
+
+            -- Horizontal counter
+            if to_integer(h_cnt) = H_TOTAL - 1 then
+                h_cnt <= (others => '0');
+            else
+                h_cnt <= h_cnt + 1;
+            end if;
+
+            -- Horizontal sync: active low during H_VISIBLE+H_FP .. H_VISIBLE+H_FP+H_SYNC-1
+            if (to_integer(h_cnt) >= H_VISIBLE + H_FP) and (to_integer(h_cnt) < H_VISIBLE + H_FP + H_SYNC) then
+                hsync <= '0';
+            else
+                hsync <= '1';
+            end if;
+
+            -- Vertical counter increments at end of each horizontal line
+            if to_integer(h_cnt) = H_TOTAL - 1 then
+                if to_integer(v_cnt) = V_TOTAL - 1 then
+                    v_cnt <= (others => '0');
+                else
+                    v_cnt <= v_cnt + 1;
+                end if;
+            end if;
+
+            -- Vertical sync: active low during V_VISIBLE+V_FP .. V_VISIBLE+V_FP+V_SYNC-1
+            if (to_integer(v_cnt) >= V_VISIBLE + V_FP) and (to_integer(v_cnt) < V_VISIBLE + V_FP + V_SYNC) then
+                vsync <= '0';
+            else
+                vsync <= '1';
+            end if;
+
+            -- Video on when within visible area
+            if (to_integer(h_cnt) < H_VISIBLE) and (to_integer(v_cnt) < V_VISIBLE) then
+                video_on := '1';
+            else
+                video_on := '0';
+            end if;
+
+            -- Pixel coordinates (registered outputs)
+            pixel_col <= std_logic_vector(resize(h_cnt, pixel_col'length));
+            pixel_row <= std_logic_vector(resize(v_cnt, pixel_row'length));
+
+            -- Output RGB only when video_on
+            if video_on = '1' then
+                red_reg   <= red_in;
+                green_reg <= green_in;
+                blue_reg  <= blue_in;
+            else
+                red_reg   <= (others => '0');
+                green_reg <= (others => '0');
+                blue_reg  <= (others => '0');
+            end if;
         end if;
-	END PROCESS;
-END Behavioral;
+    end process;
+
+    -- Drive outputs
+    red_out   <= red_reg;
+    green_out <= green_reg;
+    blue_out  <= blue_reg;
+
+end architecture;
