@@ -26,6 +26,9 @@ end entity;
 
 architecture rtl of video_top is
 
+    ----------------------------------------------------------------
+    -- Component declarations
+    ----------------------------------------------------------------
     component vga_sync is
         port (
             pixel_clk : in  std_logic;
@@ -45,10 +48,12 @@ architecture rtl of video_top is
     component video_ram is
         port (
             -- CPU port
-            clk_cpu   : in  std_logic;
-            addr_cpu  : in  std_logic_vector(9 downto 0);
-            data_in   : in  std_logic_vector(7 downto 0);
-            we        : in  std_logic;
+            clk_cpu      : in  std_logic;
+            addr_cpu     : in  std_logic_vector(9 downto 0);
+            data_in      : in  std_logic_vector(7 downto 0);
+            we           : in  std_logic;
+            data_out_cpu : out std_logic_vector(7 downto 0);
+
             -- VGA port
             clk_vga   : in  std_logic;
             addr_vga  : in  std_logic_vector(9 downto 0);
@@ -78,6 +83,9 @@ architecture rtl of video_top is
         );
     end component;
 
+    ----------------------------------------------------------------
+    -- Internal signals
+    ----------------------------------------------------------------
     signal pixel_row   : std_logic_vector(10 downto 0);
     signal pixel_col   : std_logic_vector(10 downto 0);
 
@@ -91,9 +99,10 @@ architecture rtl of video_top is
 
     -- video RAM / character ROM
     signal vram_addr_vga : std_logic_vector(9 downto 0);
-    signal vram_char     : std_logic_vector(7 downto 0);
+    signal vram_char     : std_logic_vector(7 downto 0);  -- VGA-side character code
+    signal vram_char_cpu : std_logic_vector(7 downto 0);  -- CPU-side read data
     signal char_bitmap   : std_logic_vector(7 downto 0);
-    signal char_addr : std_logic_vector(10 downto 0);
+    signal char_addr     : std_logic_vector(10 downto 0);
 
     -- CPU write into video RAM
     signal vram_cs       : std_logic;
@@ -101,32 +110,52 @@ architecture rtl of video_top is
 
 begin
 
-    vram_cs <= '1' when cpu_addr(15 downto 10) = "000001" else '0';  -- example range
+    ----------------------------------------------------------------
+    -- Video RAM chip select and write enable
+    ----------------------------------------------------------------
+    vram_cs <= '1' when cpu_addr(15 downto 10) = "000001" else '0';  -- example range 0x0400..0x07FF
     vram_we_cpu <= cpu_we and vram_cs;
 
-    -- CPU reads from video RAM when in that range
-    cpu_din <= vram_char when vram_cs = '1' else (others => '0');
+    ----------------------------------------------------------------
+    -- CPU read from video RAM (CPU-domain output)
+    ----------------------------------------------------------------
+    cpu_din <= vram_char_cpu when vram_cs = '1' else (others => '0');
+
+    ----------------------------------------------------------------
+    -- Character ROM address (character code + row within character)
+    ----------------------------------------------------------------
     char_addr <= vram_char(7 downto 0) & pixel_row(2 downto 0);
 
-
+    ----------------------------------------------------------------
+    -- Dual-port video RAM instantiation (CPU and VGA ports)
+    ----------------------------------------------------------------
     vram_inst : video_ram
         port map (
-            clk_cpu  => clk_cpu,
-            addr_cpu => cpu_addr(9 downto 0),
-            data_in  => cpu_dout,
-            we       => vram_we_cpu,
-            clk_vga  => clk_pix,
-            addr_vga => vram_addr_vga,
-            char_out => vram_char
+            clk_cpu      => clk_cpu,
+            addr_cpu     => cpu_addr(9 downto 0),
+            data_in      => cpu_dout,
+            we           => vram_we_cpu,
+            data_out_cpu => vram_char_cpu,   -- CPU read port (synchronous to clk_cpu)
+            clk_vga      => clk_pix,
+            addr_vga     => vram_addr_vga,
+            char_out     => vram_char
         );
 
+    ----------------------------------------------------------------
+    -- Character ROM (provides bitmap for a character row)
+    ----------------------------------------------------------------
     char_rom_inst : char_rom
-        port map (
-            clk  => clk_pix,
-            addr => char_addr,
-            data => char_bitmap
-        );
+  port map (
+    clk      => clk_pix,
+    addr     => char_addr,
+    ce       => '1',         -- or connect to a blanking/enable signal
+    data_out => char_bitmap
+  );
 
+
+    ----------------------------------------------------------------
+    -- Pixel generator: converts char code + bitmap to RGB and provides VGA address
+    ----------------------------------------------------------------
     pix_inst : pixel_gen
         port map (
             pixel_clk   => clk_pix,
@@ -140,6 +169,9 @@ begin
             blue        => rgb_b_in
         );
 
+    ----------------------------------------------------------------
+    -- VGA sync and output formatting
+    ----------------------------------------------------------------
     vga_sync_inst : vga_sync
         port map (
             pixel_clk => clk_pix,
