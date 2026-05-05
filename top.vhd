@@ -61,6 +61,9 @@ architecture rtl of apple1_top is
     -- debug
     signal last_tx_byte   : std_logic_vector(7 downto 0) := (others => '0');
     signal tx_write_count : unsigned(15 downto 0) := (others => '0');
+    signal pix_div : unsigned(1 downto 0) := (others => '0');
+    signal clk_pix : std_logic := '0';
+
 
     --------------------------------------------------------------------
     -- COMPONENTS
@@ -164,7 +167,8 @@ begin
     --------------------------------------------------------------------
     -- Pixel clock (no MMCM/BUFG: just pass through 100 MHz)
     --------------------------------------------------------------------
-    clk_pix_buf <= CLK100MHZ;
+    clk_pix_buf <= clk_pix;
+
 
     --------------------------------------------------------------------
     -- CPU CLOCK (100 MHz → ~1 MHz)
@@ -181,6 +185,16 @@ begin
             end if;
         end if;
     end process;
+    
+    -- Generate 25 MHz pixel clock from 100 MHz input
+process(CLK100MHZ)
+begin
+    if rising_edge(CLK100MHZ) then
+        pix_div <= pix_div + 1;
+        clk_pix <= pix_div(1);  -- divide-by-4 output
+    end if;
+end process;
+
 
     --------------------------------------------------------------------
     -- Debug capture: latch last byte written to D012 and count writes
