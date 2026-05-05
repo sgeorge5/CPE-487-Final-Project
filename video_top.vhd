@@ -6,7 +6,7 @@ entity video_top is
     port (
         -- clocks / reset
         clk_cpu   : in  std_logic;   -- same clock as 6502
-        clk_pix   : in  std_logic;   -- pixel clock for VGA (e.g. 40 MHz for 800x600)
+        clk_pix   : in  std_logic;   -- pixel clock for VGA
         reset     : in  std_logic;
 
         -- CPU side bus
@@ -61,11 +61,14 @@ architecture rtl of video_top is
         );
     end component;
 
+    -- Match your actual char_rom entity:
+    --   port ( clk, addr, ce, data_out )
     component char_rom is
         port (
-            clk   : in  std_logic;
-            addr  : in  std_logic_vector(10 downto 0);
-            data  : out std_logic_vector(7 downto 0)
+            clk      : in  std_logic;
+            addr     : in  std_logic_vector(10 downto 0);
+            ce       : in  std_logic;
+            data_out : out std_logic_vector(7 downto 0)
         );
     end component;
 
@@ -74,9 +77,12 @@ architecture rtl of video_top is
             pixel_clk   : in  std_logic;
             pixel_row   : in  std_logic_vector(10 downto 0);
             pixel_col   : in  std_logic_vector(10 downto 0);
+
             char_code   : in  std_logic_vector(7 downto 0);
             char_bitmap : in  std_logic_vector(7 downto 0);
+
             vram_addr   : out std_logic_vector(9 downto 0);
+
             red         : out std_logic_vector(3 downto 0);
             green       : out std_logic_vector(3 downto 0);
             blue        : out std_logic_vector(3 downto 0)
@@ -112,8 +118,9 @@ begin
 
     ----------------------------------------------------------------
     -- Video RAM chip select and write enable
+    -- 0x0400..0x07FF -> cpu_addr(15 downto 10) = "000001"
     ----------------------------------------------------------------
-    vram_cs <= '1' when cpu_addr(15 downto 10) = "000001" else '0';  -- example range 0x0400..0x07FF
+    vram_cs     <= '1' when cpu_addr(15 downto 10) = "000001" else '0';
     vram_we_cpu <= cpu_we and vram_cs;
 
     ----------------------------------------------------------------
@@ -123,8 +130,9 @@ begin
 
     ----------------------------------------------------------------
     -- Character ROM address (character code + row within character)
+    -- row index = pixel_row(2 downto 0) for 8 rows
     ----------------------------------------------------------------
-    char_addr <= vram_char(7 downto 0) & pixel_row(2 downto 0);
+    char_addr <= vram_char & pixel_row(2 downto 0);
 
     ----------------------------------------------------------------
     -- Dual-port video RAM instantiation (CPU and VGA ports)
@@ -135,7 +143,8 @@ begin
             addr_cpu     => cpu_addr(9 downto 0),
             data_in      => cpu_dout,
             we           => vram_we_cpu,
-            data_out_cpu => vram_char_cpu,   -- CPU read port (synchronous to clk_cpu)
+            data_out_cpu => vram_char_cpu,
+
             clk_vga      => clk_pix,
             addr_vga     => vram_addr_vga,
             char_out     => vram_char
@@ -145,25 +154,27 @@ begin
     -- Character ROM (provides bitmap for a character row)
     ----------------------------------------------------------------
     char_rom_inst : char_rom
-  port map (
-    clk      => clk_pix,
-    addr     => char_addr,
-    ce       => '1',         -- or connect to a blanking/enable signal
-    data_out => char_bitmap
-  );
-
+        port map (
+            clk      => clk_pix,
+            addr     => char_addr,
+            ce       => '1',
+            data_out => char_bitmap
+        );
 
     ----------------------------------------------------------------
-    -- Pixel generator: converts char code + bitmap to RGB and provides VGA address
+    -- Pixel generator: converts char code + bitmap to RGB and provides VRAM address
     ----------------------------------------------------------------
     pix_inst : pixel_gen
         port map (
             pixel_clk   => clk_pix,
             pixel_row   => pixel_row,
             pixel_col   => pixel_col,
+
             char_code   => vram_char,
             char_bitmap => char_bitmap,
+
             vram_addr   => vram_addr_vga,
+
             red         => rgb_r_in,
             green       => rgb_g_in,
             blue        => rgb_b_in
