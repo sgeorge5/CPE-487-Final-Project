@@ -42,10 +42,25 @@ signal scroll_pending   : std_logic := '0';
 
 signal clear_counter : integer range 0 to 1024 := 0;
 
+signal da_sync   : std_logic_vector(1 downto 0) := "00";
+signal char_sync : std_logic_vector(6 downto 0) := (others => '0');
+signal char_sync2: std_logic_vector(6 downto 0) := (others => '0');
+
+signal cursor_clock : std_logic_vector(24 downto 0) := (others => '0');
+signal cursor_char : std_logic_vector(5 downto 0);
+
 begin
+    cursor_char <= "000000" when cursor_clock(24) = '1' else "100000";
+
     process (pixel_clk)
     begin
-        if rising_edge(pixel_clk) then
+        if rising_edge(pixel_clk) then    
+            da_sync    <= da_sync(0) & data_available;
+            char_sync  <= char_code_in;
+            char_sync2 <= char_sync;
+            
+            cursor_clock <= std_logic_vector(unsigned(cursor_clock) + 1);
+            
             if clr_screen = '1' and state /= CLEARING then
                 state <= CLEARING;
                 clear_counter <= 1024;
@@ -92,7 +107,11 @@ begin
                     buf_we <= '0';
                     if v_blank = '0' and burst_ptr <= 40 then
                         buf_write_addr <= 40 - burst_ptr;
-                        buf_write_data <= r_shift(1023)(6 downto 1);
+                        if r_shift(1023)(0) = '0' then
+                            buf_write_data <= cursor_char;
+                        else
+                            buf_write_data <= r_shift(1023)(6 downto 1);
+                        end if;
                         buf_we         <= '1';
                     end if;
     
@@ -117,12 +136,11 @@ begin
                     if v_blank = '0' then
                         --logic for writing to shift register
                         if state = NORMAL then
-                            if r_shift(1023)(0) = '0' and data_available = '1' then
+                            if r_shift(1023)(0) = '0' and da_sync(1) = '1' then
                                 --only print if not control character
-                                ready_data_accept <= '1';
-                                
-                                if char_code_in(6) = '1' or char_code_in(5) = '1' then
-                                    r_shift(0)(6 downto 1) <= char_code_in(5 downto 0);
+                                 
+                                if char_sync2(6) = '1' or char_sync2(5) = '1' then
+                                    r_shift(0)(6 downto 1) <= char_sync2(5 downto 0);
                                     r_shift(0)(0) <= '1';
                                     cursor_inject <= '1';
                                     
@@ -137,12 +155,16 @@ begin
                                         cursor_x <= cursor_x + 1;
                                     end if;
                                     
-                                elsif char_code_in(3 downto 0) = "1101" then
+                                    ready_data_accept <= '1';
+                                    
+                                elsif char_sync2 = "0001101" then
                                     r_shift(0) <= "1000001";
                                     state <= CR;
                                     ready_data_accept <= '0'; --set RDA back to 0 until CR is done
-                                end if;
-                                            
+                                else
+                                    ready_data_accept <= '1';
+                                end if;                                
+                     
                             end if;
         
                         elsif state = CR then
@@ -158,7 +180,7 @@ begin
                                     row_counter <= row_counter + 1;
                                     state <= NORMAL;
                                 end if;
-                                state <= NORMAL;
+                                --state <= NORMAL;
                                 ready_data_accept <= '1';
                             end if;
         
