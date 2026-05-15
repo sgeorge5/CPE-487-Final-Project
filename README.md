@@ -272,10 +272,6 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
 
 ### Responsibilities
 
-## Team Summary
-
-### Responsibilities
-
 | **Shaun George**                                                                                                                                                                                                                                                                  | **Miguel Hernandez**                                                                                                                                                                       | **William Cronk**                                                                                                                                                                          |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Implemented and debugged the UART receiver (`uart_protocol.vhd`, `shiftregister.vhd`) and integrated the Motorola 6821 PIA (`6821_core.vhd`, `io_top.vhd`). Helped with debugging across CPU, memory, and display paths, and contributed to the written report and documentation. | Helped design and verify RAM (`ram.vhd`) and ROM (`rom.vhd`) behavior. Worked on memory map alignment with the 6502 CPU and assisted with Wozmon boot behavior and address decoding logic. | Assisted with miscellaneous logic and integration tasks. Helped verify synthesis and implementation results, supported VGA, CPU, and I/O debugging, and filled in remaining project needs. |
