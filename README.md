@@ -165,15 +165,7 @@ _An example of writing, reading, and running a program in Wozmon_
 | **Wozmon ROM (`rom.vhd`)**                                  | Apple-1 Manual (1976)                                 | The original monitor program written by Steve Wozniak. We translated the published hex dump into a VHDL ROM array               |
 | **Clock Wizard (`clk_wiz_0.vhd`, `clk_wiz_0_clk_wiz.vhd`)** | CPE 487 Lab 6                                         | Xilinx MMCM configuration that converts the 100 MHz board clock to 108 MHz for VGA timing. Used exactly as provided in the lab. |
 
-### **6502 CPU**
-
-- The main stepping-stone for our project is a premade 6502 CPU core from https://github.com/Steve-Teal/mx65
-- The CPU is essentially a giant state machine
-- Puts address on address line, processes incoming data, etc.
-- Vital to the operation of Wozmon, operates on values of certain peripheral registers to see if bits are cleared, takes advantage of conditional execution
-- The “brain” of the Apple I
-- Largely a “black-box” model for our project, we need only be concerned with inputs/outputs
-- Still helpful/necessary to know 6502 ASM to program the Apple I!
+### **Modified / New Components**
 
 ### **Display Circuitry**
 
@@ -185,13 +177,58 @@ _An example of writing, reading, and running a program in Wozmon_
   - The “core” of the Apple I display circuitry
   - Closely models the original hardware
   - 7 x 1024-bit shift registers modeled with a VHDL array:
-  - ````
-        type r_shift_t is array(1023 downto 0) of std_logic_vector(6 downto 0); signal r_shift
-        : r_shift_t := (1023 => "0000000", others => "1000001");
-        ```
-    The Apple I essentially operates by shifting each entry left an entire 1024 times per frame to ensure it is drawn at the same place on screen during each frame
-    Shifts happen during VGA blanking periods
-    ````
+  - ```
+    type r_shift_t is array(1023 downto 0) of std_logic_vector(6 downto 0);
+    signal r_shift : r_shift_t := (1023 => "0000000", others => "1000001");
+    ```
+  - The Apple I essentially operates by shifting each entry left an entire 1024 times per frame to ensure it is drawn at the same place on screen during each frame
+  - Shifts happen during VGA blanking periods
+    - During the first hblank of a new character row, the entire row is shifted left 40x but also copied into a line buffer for that row:
+    - ```
+      buf_we <= '0';
+      if v_blank = '0' and burst_ptr <= 40 then
+        buf_write_addr <= 40 - burst_ptr;
+        if r_shift(1023)(0) = '0' then
+          buf_write_data <= cursor_char;
+        else
+          buf_write_data <= r_shift(1023)(6 downto 1);
+        end if;
+        buf_we         <= '1';
+      end if;
+      ```
+    - This line buffer is then sent to the pixel decode module to be processed
+    - During vblank, we must shift an extra 64 times to account for the extra 64 characters of space in shift register memory (24 rows \* 40 columns is only 960 characters):
+    - ```
+      if v_blank = '1' and v_burst_done = '0' then
+        burst_ptr <= 64;
+        if scroll_pending = '1' then
+          burst_ptr <= 64 + 40;
+          state <= SCROLL;
+          scroll_pending <= '0';
+        end if;
+        v_burst_done <= '1';
+      ```
+    - Notice that we shift an extra 40 times if scrolling to ensure that the entire screen gets pushed up by 1 row
+- Line Buffer Module
+  - Simply gets character rows shifted into it for every new character row reached on the screen
+  - A new character row is reached in the drawing area every 16 scanlines (the height of a character cell)
+  - Can be accessed by the pixel decode module and written to by the shift register module
+- Pixel decode module
+  - Does the main math to determine what to draw on the screen
+  - Draws from font_rom_pkg.vhd bitmaps
+  - Receives line buffer for the current line from line_buffer.vhd
+  - <img width="289" height="220" alt="image" src="https://github.com/user-attachments/assets/db68efcc-bc1f-4aa6-9214-ec61e9f89205" />
+  - Receives current pixel row, column being drawn by vga_sync and uses modulus math to determine what index in the line buffer we are in:
+  - ```
+    scanline   := (ipixel_row - 108) mod 16;
+    vindex     := scanline / 2; --vertical index within character
+    hindex     := ((ipixel_col - 120) mod 14) / 2; --horizontal within character
+    char_col   := (ipixel_col - 120) / 14;
+    ```
+  - Pixel decoder will then draw from the font rom for that specific index within the character to determine whether the pixel should be on or not
+- VGA_sync and clk_wiz function nearly identically to how they were used in previous labs
+  - VGA_sync had two signals added, hblank and vblank, which go high when not in active row/vertical drawing space
+  - Used for timing purposes within shiftregister.vhd
 
 ## Project Results (Images & Videos)
 
