@@ -164,15 +164,7 @@ _An example of writing, reading, and running a program in Wozmon_
 | **Wozmon ROM (`rom.vhd`)** | Apple-1 Manual (1976) | The original monitor program written by Steve Wozniak. We translated the published hex dump into a VHDL ROM array |
 | **Clock Wizard (`clk_wiz_0.vhd`, `clk_wiz_0_clk_wiz.vhd`)** | CPE 487 Lab 6 | Xilinx MMCM configuration that converts the 100 MHz board clock to 108 MHz for VGA timing. Used exactly as provided in the lab. |
 
-### **6502 CPU**
-- The main stepping-stone for our project is a premade 6502 CPU core from https://github.com/Steve-Teal/mx65
-- The CPU is essentially a giant state machine
-- Puts address on address line, processes incoming data, etc.
-- Vital to the operation of Wozmon, operates on values of certain peripheral registers to see if bits are cleared, takes advantage of conditional execution
-- The “brain” of the Apple I
-- Largely a “black-box” model for our project, we need only be concerned with inputs/outputs
-- Still helpful/necessary to know 6502 ASM to program the Apple I!
-
+### **Modified / New Components**
 ### **Display Circuitry**
 - Consists of several files tied together in display_top.vhd
   - Line buffer module, pixel decode module, vga sync module, clk wiz module, shift register module, font rom package
