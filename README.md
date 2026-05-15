@@ -337,9 +337,7 @@ _An example of writing, reading, and running a program in Wozmon_
 
 Video Demonstration: https://youtu.be/3480DhZKkzs 
 
-## Team Summary
 
-### Responsibilities
 
 ## Team Summary
 
