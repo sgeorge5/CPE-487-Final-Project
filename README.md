@@ -2,7 +2,12 @@
 
 ## Project Overview
 
-- Beginning yap
+The goal of this project was to create a (somewhat) faithful recreation of the Apple I computer in
+VHDL for use on the Nexys-A7 FPGA board. The project closely emulates the original hardware
+of the Apple I, modeling its proprietary shift-register based display circuitry for output through
+the VGA port as well the Motorola 6821 peripheral interface adapter that allows simultaneous
+connection of a keyboard and a monitor to the 6502 CPU.
+
 - Expected Behavior
 
 ## Required Hardware
