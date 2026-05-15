@@ -423,6 +423,14 @@ _An example of writing, reading, and running a program in Wozmon_
     end process;
     ```
 
+#### Address Decoding
+
+The RAM is enabled only for addresses `$0000–$0FFF` (4KB). The upper 4 bits of the address bus determine when RAM is active:
+
+```vhdl
+S_ram_ce <= '1' when S_univ_addr_bus(15 downto 12) = x"0" else '0';
+```
+
 ## Project Results (Images & Videos)
 <img width="443" height="391" alt="image" src="https://github.com/user-attachments/assets/923331cb-abf4-461e-98d9-c483d06b944c" />
 
