@@ -78,6 +78,21 @@ _(XXXX and YYYY represent hexadecimal values of up to 4 bytes)_
 | `XXXX: YY YY YY …` | Edit contents starting at address |
 | `XXXXR`            | Run program starting at address   |
 
+![An example of writing, reading, and running a program in Wozmon](wozmonss.png)
+_An example of writing, reading, and running a program in Wozmon_
+
+- Display should automatically scroll upwards once text reaches the bottom of the screen.
+
+- Wozmon will process and run any **6502 machine code programs** that are written at a memory location in the available **4 KB of RAM**.
+- Essentially, any program that can fit within 4 KB of RAM and can be written in 6502 machine code can be run on our Apple I implementation.
+- Some example programs:
+  - **Apple I Manual Test Program:** Prints all 64 ASCII characters available to the Apple I in a row, then prints a carriage return (CR).
+    - _Machine Code listing at $0000:_  
+      `A9 00 AA 20 EF FF E8 8A 4C 02 00`
+  - **Our Own Test Program:** Prints the ASCII string located at memory location $0100 and terminated with character #$00.
+    - _Machine Code listing at $0000:_  
+      `A9 0D 20 EF FF A2 00 BD 00 01 C9 00 F0 07 20 EF FF EB 18 90 F2 A9 0D 20 EF FF 4C 1F FF`
+
 ## Vivado Setup & Programming Instructions
 
 1. **Download all source files** (`.vhd`) and the constraint file (`.xdc`) from this repository.
@@ -115,8 +130,8 @@ _(XXXX and YYYY represent hexadecimal values of up to 4 bytes)_
 ### Responsibilities
 
 ## Summary of Process
-<img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
 
+<img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
 
 ### Timeline
 
