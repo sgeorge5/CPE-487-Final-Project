@@ -117,6 +117,33 @@ _An example of writing, reading, and running a program in Wozmon_
 9. **Verify Operation**
    - Confirm VGA output and UART communication are functioning as expected.
 
+## Tera Term Setup
+
+- **Download the latest Tera Term installer** from:  
+  [https://github.com/TeraTermProject/teraterm/releases](https://github.com/TeraTermProject/teraterm/releases)
+- Follow the steps in the installation wizard.
+- Open **Tera Term** and select **Serial connection**, setting it to the COM port that matches your Nexys A7 board.
+
+![Serial Port Setup](serialport.png)
+
+- Go to **Setup → Serial Port** and configure:
+  - Speed = 9600
+  - Data = 8 bit
+  - Parity = None
+  - Stop Bits = 1 bit
+  - Flow control = NONE
+- You should now be able to send serial data to the board.
+
+---
+
+## VGA Setup
+
+- **If using an HDMI monitor:**  
+  Connect the VGA‑to‑HDMI adapter to the VGA port on the Nexys A7 board.  
+  Then connect the HDMI cable from your monitor to the adapter, and plug the adapter’s USB cable into the board’s USB Host port.
+- **If using a VGA monitor:**  
+  Connect a VGA cable directly from your monitor to the board’s VGA port.
+
 ## FPGA Inputs & Outputs
 
 ## Modifications & Implemntation
