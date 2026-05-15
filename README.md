@@ -8,8 +8,20 @@ of the Apple I, modeling its proprietary shift-register based display circuitry 
 the VGA port as well the Motorola 6821 peripheral interface adapter that allows simultaneous
 connection of a keyboard and a monitor to the 6502 CPU.
 
-- Expected Behavior
+Apple I Overview:
+- Simple MOS-6502 based machine with dedicated video circuitry
+- Utilized 256 bytes of ROM to store a lightweight hex monitor / operating system (Wozmon)
+- Shipped with 4K of user-accessible RAM
+- Utilized the Motorola 6821 Peripheral Interface Adapter to bridge the gap between the keyboard + display circuitry
+- Display circuitry consisted of 7 x 1024-bit shift registers
 
+Our Implemntation:
+- Built upon a premade 6502 CPU core from https://github.com/Steve-Teal/mx65
+- Utilized vga_sync module from Lab 6 for display timing (along with associated clk_wiz modules)
+- Utilized UART protocol to serially transfer ASCII data from computer to Nexys-A7 board along with custom UART receiver module
+- Closely modeled behavior of the Apple I display circuitry + adjusted to interface with VGA protocol
+- Closely modeled behavior of the 6821 Peripheral Interface Adapter
+- Created a 4K RAM module to interface with the 6502 CPU
 ## Required Hardware
 
 - **Digilent Nexys A7 FPGA Board**
