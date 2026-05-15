@@ -45,16 +45,6 @@ Our Implemntation:
 
     <img src="https://www.cableleader.com/media/catalog/product/cache/742ba6aef1a9922ba35601edb4c965fb/u/s/usb_2.0_a_male_to_micro_b_male_cable_black_5.jpg" alt="VGA to HDMI cable" width="200">
 
-### Pin Mapping
-
-## System Architecture
-
-### System Block Diagram
-
-### Memory Map
-
-### Finite State Machines
-
 ## Expected Behavior
 
 ### Required Attachments
