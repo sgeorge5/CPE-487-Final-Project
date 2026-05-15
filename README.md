@@ -341,9 +341,14 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
 
 ### Responsibilities
 
-| **Shaun George**                                                                                                                                                                                                                                                                  | **Miguel Hernandez**                                                                                                                                                                       | **William Cronk**                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Implemented and debugged the UART receiver (`uart_protocol.vhd`, `shiftregister.vhd`) and integrated the Motorola 6821 PIA (`6821_core.vhd`, `io_top.vhd`). Helped with debugging across CPU, memory, and display paths, and contributed to the written report and documentation. | Helped design and verify RAM (`ram.vhd`) and ROM (`rom.vhd`) behavior. Worked on memory map alignment with the 6502 CPU and assisted with Wozmon boot behavior and address decoding logic. | Assisted with miscellaneous logic and integration tasks. Helped verify synthesis and implementation results, designed shift register logic and other display circuitry / pixel decoding logic (line buffer, etc.), CPU, and I/O debugging, and filled in remaining project needs. |
+## Team Summary
+
+### Responsibilities
+
+| **Shaun George** | **Miguel Hernandez** | **William Cronk** |
+| ---------------- | -------------------- | ----------------- |
+| Worked on the UART interface and PIA configuration. Helped with debugging and authoring the final report. | Implemented CPU, RAM, and Wozmon ROM connectivity logic using the mx65 core. Helped author the final report. | Implemented shift‑register logic, io_top, and apple_i_top files. Responsible for compiling, synthesizing, and running the entire project. Helped author the final report. |
+
 
 ## Summary of Process
 
