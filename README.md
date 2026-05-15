@@ -262,6 +262,75 @@ _An example of writing, reading, and running a program in Wozmon_
 - VGA_sync and clk_wiz function nearly identically to how they were used in previous labs
   - VGA_sync had two signals added, hblank and vblank, which go high when not in active row/vertical drawing space
   - Used for timing purposes within shiftregister.vhd
+ 
+### **Peripheral Interface Adapter (PIA)**
+- Model of the Motorola 6821 PIA
+- Features control/data registers from address ``0xD010-0xD013``
+  - Data registers hold input from keyboard / output before it is pushed to display
+  - Control registers control the function of the PIA's inputs/outputs/interrupts
+  - **General function of the control registers highlighted here**
+  - <img width="812" height="1106" alt="image" src="https://github.com/user-attachments/assets/8eeaf7ac-2acd-4009-a16f-54e8bef93759" />
+- VHDL code attempts to closely model the functionality of the 6821 PIA
+  - Code snippets would be too large to put here, but the PIA functions as a mix of combinational/synchronous logic
+- Main functionality with data direction registers
+  - Upon startup/reset, data registers are configured as data direction registers
+  - Setting a bit of 1 anywhere in these 8-bit registers configures the bit as output, a 0 as input
+  - Keyboard DDR set to all 0s (all inputs), display DDR set to all outputs except for MSB, used as signal to tell the PIA when it is ready to receive character data
+
+### **UART**
+- Custom UART receiver coded in VHDL
+- Essentially acts as a simple 2-state machine to receive input from TeraTerm
+  - More akin to a Mealy machine, outputs are not dependent on state only
+  - <img width="798" height="523" alt="image" src="https://github.com/user-attachments/assets/19369e2b-a5e3-4c54-9bd1-1692ee5c08c4" />
+- **Generalized UART packet description**
+  - <img width="536" height="223" alt="image" src="https://github.com/user-attachments/assets/543c1860-0f0b-4500-a35e-6a4b8eee6aa1" />
+  - Upon detection of start bit, start capturing data
+  - Data captured at 9600 baud * 16 oversampling
+    - Must divide clock!
+    - Count up to 651 to divide 100MHz clock down to ~ 150KHz, 16x baud
+    - Capture bit on the middle (7th) tick to ensure we are getting the most stable value!
+    - ```
+      if sync = 650 then  
+                        if sync_count = 15 then
+                            sync_count <= 0;
+
+                            if bit_count = 9 then
+                                bit_count <= 0;
+                                captured_data <= shift_reg10;
+                                data_ready <= '1';
+                                state <= IDLE;
+                            else
+                                bit_count <= bit_count + 1;
+                            end if;
+
+                        elsif sync_count = 7 then
+                            if bit_count = 0 and uart_stable /= '0' then
+                                state <= IDLE;
+                            else
+                                shift_reg10 <= uart_stable & shift_reg10(9 downto 1);           
+                            end if;
+                            sync_count <= sync_count + 1;
+                        else
+                            sync_count <= sync_count + 1;
+                        end if; 
+                        
+                        sync <= 0;
+                    else 
+                        sync <= sync + 1;
+                    end if;
+      ```
+    - Upon detection of stop bit, go back to idle and send data if valid (simple start/stop bit check)
+      - ```
+         if data_ready = '1' then
+                if captured_data(9) = '1' and captured_data(0) = '0' then
+                    ASCII_OUT <= captured_data(8 downto 1);
+                    STROBE <= '1';
+                end if;
+                data_ready <= '0';
+            else
+                STROBE <= '0';
+            end if;
+        ```
 
 ## Project Results (Images & Videos)
 <img width="443" height="391" alt="image" src="https://github.com/user-attachments/assets/923331cb-abf4-461e-98d9-c483d06b944c" />
