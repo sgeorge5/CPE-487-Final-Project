@@ -447,8 +447,6 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
 
 ## Summary of Process
 
-<img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
-
 ### Timeline
 - Week 1 (April 12): Proposal, initial project idea, conceptual analysis
   - Figuring out approaches to use / how to fit things together
@@ -494,3 +492,6 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
     - Can find logical flaws that are hard to debug by inspection 
 
 ## File Structure
+<img width="316" height="488" alt="image" src="https://github.com/user-attachments/assets/ffd94137-6545-4532-bab2-44f9efb61c2d" />
+
+<img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
