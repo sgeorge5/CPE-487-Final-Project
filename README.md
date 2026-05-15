@@ -134,8 +134,6 @@ _An example of writing, reading, and running a program in Wozmon_
   - Flow control = NONE
 - You should now be able to send serial data to the board.
 
----
-
 ## VGA Setup
 
 - **If using an HDMI monitor:**  
