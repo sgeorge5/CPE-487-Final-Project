@@ -450,56 +450,47 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
 <img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
 
 ### Timeline
-
-#### 04/13/2026
-* Submitted the official project proposal for the Apple‑I FPGA implementation  
-* Began researching the Apple‑I architecture, including the 6502 CPU, PIA, shift‑register display, and Wozmon ROM
-
-#### 04/16/2026
-* Set up the Vivado project and created the initial file directory  
-* Imported the mx65 CPU core and reviewed integration requirements
-
-#### 04/20/2026
-* Began implementing CPU, RAM, and ROM connectivity  
-* Established the memory map and verified Wozmon ROM addressing
-
-#### 04/24/2026
-* Started working on the UART interface and PIA configuration  
-* Continued debugging early data‑flow issues
-
-#### 04/28/2026
-* Began configuring the shift‑register display logic  
-* Connected pixel_decode, linebuffer, and VGA timing modules
-
-#### 05/01/2026
-* Integrated major modules into apple_i_top  
-* Performed the first synthesis and implementation run in Vivado
-
-#### 05/04/2026
-* Continued debugging CPU, memory, and UART timing issues  
-* Achieved stable VGA output and visible character rendering
-
-#### 05/07/2026
-* Successfully booted Wozmon on hardware  
-* Verified basic monitor commands and memory access behavior
-
-#### 05/10/2026
-* Completed full system testing: UART → CPU → RAM → Display  
-* Ran sample 6502 programs through Wozmon for validation
-
-#### 05/12/2026
-* Presented the Apple‑I FPGA implementation in class poster session 
-* Demonstrated Wozmon operation, VGA output, and UART interaction
-
-#### 05/13/2026
-* Finalized debugging and cleaned up VHDL modules  
-* Completed writing and polishing the final project report
-
-#### 05/14/2026
-* Submitted the final report and finalized all project files
+- Week 1 (April 12): Proposal, initial project idea, conceptual analysis
+  - Figuring out approaches to use / how to fit things together
+- Week 2 (April 19): Initial design
+  - Began work on a 6502 core, quickly discarded after scale bacame aparent
+  - Rough mockups of ram file / top-level interconnectivity
+  - Getting 6502 core working with our ram file / adjusting timing
+- Week 3 (April 26): Preliminary work on PIA / interfaces / initial character rom / display circuitry work
+  - Most of these files were rough around the edges / needed much improvement, more proofs of concept
+- Week 4 (May 3): Rebuilding of PIA file / Continued work on display circuitry / Uart/PS/2 considerations
+  - Initially utilized a more modern-based VRAM approach for the display circuitry
+  - Prone to glitches / routing issues
+  - Switched to a shift-register approach within this week
+  - Began work on input functionality
+    - Initial PS/2 receiver module scrapped due to lack of compatiblity with modern keyboards
+    - UART receiver used instead
+  - Rebuilt PIA file
+- Week 5 (May 10): Top-level organization / Bug fixes / Validation
+  - Fixed small bugs like double character printing, cursor blinking
+  - Organized all files at the top-level, synthesized design several times to verify functionality
+  - Performed tests on the final design to ensure complete functionality
+    - Use of Wozmon commands / running basic programs   
 
 ### Difficulties
+- Randomly accessible video memory Vs. Shift registers
+  - Sank a lot of time into the first approach
+  - Came to realize it was prone to errors / also fit awkwardly with the timing that Wozmon expected in terms of ready signals from the display
+  - Decided to switch to shift register approach
+- Uart Vs. PS/2 protocol
+  - PS/2 protocol programming was a large timesink, only to find it wasn't compatible with modern equipment
+  - Porting to UART protocol caused delays
+- PIA logical complexity
+  - Modeling the PIA after a real-world chip (Motorola 6821) brings with it logical challenges
+  - Logic is already documented / must be inferred and reverse-engineered, cannot come up with it yourself
+    - Especially the case if you want full functionality / compatibility with the original Wozmon OS  
 
-### Future Works
+### AI Usage
+  - AI was not used for initial code generation
+    - One exception: AI was used to complete the font_rom_pkg.vhd file once we felt we had a long enough template for it to go off of
+    - We felt that this was a good use of AI: Supporting tedious, repetitive work
+  - Main use of AI was for debugging / uncovering possible implementation hazards
+    - Can help determine where things may fail in synthesis vs. simulation
+    - Can find logical flaws that are hard to debug by inspection 
 
 ## File Structure
