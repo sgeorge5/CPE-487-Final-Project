@@ -182,7 +182,8 @@ _An example of writing, reading, and running a program in Wozmon_
   - The “core” of the Apple I display circuitry
   - Closely models the original hardware
   - 7 x 1024-bit shift registers modeled with a VHDL array:
-  - ```type r_shift_t is array(1023 downto 0) of std_logic_vector(6 downto 0); signal r_shift          : r_shift_t := (1023 => "0000000", others => "1000001");```
+  - ```type r_shift_t is array(1023 downto 0) of std_logic_vector(6 downto 0); signal r_shift
+    : r_shift_t := (1023 => "0000000", others => "1000001");```
 The Apple I essentially operates by shifting each entry left an entire 1024 times per frame to ensure it is drawn at the same place on screen during each frame
 Shifts happen during VGA blanking periods
 
