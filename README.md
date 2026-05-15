@@ -9,6 +9,7 @@ the VGA port as well the Motorola 6821 peripheral interface adapter that allows 
 connection of a keyboard and a monitor to the 6502 CPU.
 
 Apple I Overview:
+
 - Simple MOS-6502 based machine with dedicated video circuitry
 - Utilized 256 bytes of ROM to store a lightweight hex monitor / operating system (Wozmon)
 - Shipped with 4K of user-accessible RAM
@@ -16,6 +17,7 @@ Apple I Overview:
 - Display circuitry consisted of 7 x 1024-bit shift registers
 
 Our Implemntation:
+
 - Built upon a premade 6502 CPU core from https://github.com/Steve-Teal/mx65
 - Utilized vga_sync module from Lab 6 for display timing (along with associated clk_wiz modules)
 - Utilized UART protocol to serially transfer ASCII data from computer to Nexys-A7 board along with custom UART receiver module
@@ -24,7 +26,6 @@ Our Implemntation:
 - Created a 4K RAM module to interface with the 6502 CPU
 
 <img width="371" height="272" alt="image" src="https://github.com/user-attachments/assets/2f2074ae-2aa9-4346-8e09-630a412b5337" />
-
 
 ## Required Hardware
 
@@ -51,6 +52,28 @@ Our Implemntation:
 ### Finite State Machines
 
 ## Vivado Setup & Programming Instructions
+
+1. **Download all source files** (`.vhd`) and the constraint file (`.xdc`) from this repository.
+2. **Create a new Vivado project** targeting the **Digilent Nexys A7‑100T FPGA board**.
+3. **Add Source Files**  
+   Include the following VHDL modules:
+   - `apple_i_top.vhd` (top‑level design)
+   - `clk_wiz_0.vhd` and `clk_wiz_0_clk_wiz.vhd` (clock generation)
+   - `display_top.vhd`, `vga_sync.vhd`, `pixel_decode.vhd`, `line_buffer.vhd` (video pipeline)
+   - `ram.vhd`, `rom.vhd`, `font_rom_pkg.vhd` (memory components)
+   - `io_top.vhd`, `uart_protocol.vhd`, `shiftregister.vhd`, `6821_core.vhd`, `mx65.vhd` (I/O and peripheral logic)
+4. **Add Constraints File**
+   - Use `apple_i_top.xdc` for pin assignments and board‑specific mappings.
+5. **Run Synthesis**
+   - Verify that all modules compile successfully and resolve dependencies.
+6. **Run Implementation**
+   - Check timing reports and ensure all constraints are met.
+7. **Generate Bitstream**
+   - Wait for Vivado to complete bitstream generation (`.bit` file).
+8. **Program the Device**
+   - Open **Hardware Manager**, connect the Nexys A7 board via USB, and program it with the generated bitstream.
+9. **Verify Operation**
+   - Confirm VGA output and UART communication are functioning as expected.
 
 ## FPGA Inputs & Outputs
 
