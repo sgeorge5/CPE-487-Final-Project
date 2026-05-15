@@ -18,6 +18,8 @@ connection of a keyboard and a monitor to the 6502 CPU.
 
 - **VGA Monitor** (800×600 @ 60 Hz)
 
+    <img src="https://c1.neweggimages.com/productimage/nb640/24-276-208-Z01.jpg" alt="VGA Monitor (800×600 @ 60 Hz)" width="300">
+
 - **VGA to HDMI Cable**
 
     <img src="https://img.fruugo.com/product/6/66/1682800666_max.jpg" alt="VGA to HDMI cable" width="200">
