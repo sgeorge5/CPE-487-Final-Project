@@ -94,7 +94,9 @@ _An example of writing, reading, and running a program in Wozmon_
     - _Machine Code listing at $0000:_  
       `A9 0D 20 EF FF A2 00 BD 00 01 C9 00 F0 07 20 EF FF EB 18 90 F2 A9 0D 20 EF FF 4C 1F FF`
 
-## Vivado Setup & Programming Instructions
+## System Configuration & Instructions
+
+### Vivado Setup & Programming Instructions
 
 1. **Download all source files** (`.vhd`) and the constraint file (`.xdc`) from this repository.
 2. **Create a new Vivado project** targeting the **Digilent Nexys A7‑100T FPGA board**.
@@ -118,7 +120,9 @@ _An example of writing, reading, and running a program in Wozmon_
 9. **Verify Operation**
    - Confirm VGA output and UART communication are functioning as expected.
 
-## Tera Term Setup
+---
+
+### Tera Term Setup
 
 - **Download the latest Tera Term installer** from:  
   [https://github.com/TeraTermProject/teraterm/releases](https://github.com/TeraTermProject/teraterm/releases)
@@ -135,7 +139,9 @@ _An example of writing, reading, and running a program in Wozmon_
   - Flow control = NONE
 - You should now be able to send serial data to the board.
 
-## VGA Setup
+---
+
+### VGA Setup
 
 - **If using an HDMI monitor:**  
   Connect the VGA‑to‑HDMI adapter to the VGA port on the Nexys A7 board.  
