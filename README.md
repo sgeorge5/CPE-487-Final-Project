@@ -271,7 +271,79 @@ _An example of writing, reading, and running a program in Wozmon_
   - **General function of the control registers highlighted here**
   - <img width="812" height="1106" alt="image" src="https://github.com/user-attachments/assets/8eeaf7ac-2acd-4009-a16f-54e8bef93759" />
 - VHDL code attempts to closely model the functionality of the 6821 PIA
-  - Code snippets would be too large to put here, but the PIA functions as a mix of combinational/synchronous logic
+  - Code snippets for resolving every control bit would be too large to put here, but the PIA functions as a mix of combinational/synchronous logic
+  - Regardless, here is a sample snippet of the logic used to determine IRQA/B 1/2 (bits b7 and b6 of the control registers)
+  - ```
+    process(rst, irqa1, irqa2, irqb1, irqb2, pa_read, pb_read, cra_reg, crb_reg,
+            ca1_in, ca1_prev, ca2_in, ca2_prev, cb1_in, cb1_prev, cb2_in, cb2_prev)
+    begin
+        if rst = '0' then
+            irqa1_next <= '0';
+            irqa2_next <= '0';
+            irqb1_next <= '0';
+            irqb2_next <= '0';
+        else
+            irqa1_next <= irqa1;
+            irqa2_next <= irqa2;
+            irqb1_next <= irqb1;
+            irqb2_next <= irqb2;
+    
+            --set irqa to 0 on peripheral register A read
+            if pa_read = '1' then
+                irqa1_next <= '0';
+                irqa2_next <= '0';
+            end if;
+    
+            --set irqb to 0 on peripheral register B read
+            if pb_read = '1' then
+                irqb1_next <= '0';
+                irqb2_next <= '0';
+            end if;
+    
+            --enable IRQA1 on CA1 transition when b0 = 1
+            if cra_reg(0) = '1' then 
+                if ca1_in = '1' AND ca1_prev = '0' AND cra_reg(1) = '1' then
+                    irqa1_next <= '1';
+                elsif ca1_in = '0' AND ca1_prev = '1' AND cra_reg(1) = '0' then
+                    irqa1_next <= '1';
+                end if;
+            end if;
+    
+            --enable IRQA2 on CA2 transition (only for CA2 as input when b5 = 0)
+            if cra_reg(5) = '0' AND cra_reg(3) = '1' then 
+                if ca2_in = '1' AND ca2_prev = '0' AND cra_reg(4) = '1' then
+                    irqa2_next <= '1';
+                elsif ca2_in = '0' AND ca2_prev = '1' AND cra_reg(4) = '0' then
+                    irqa2_next <= '1';
+                end if;
+            elsif cra_reg(5) = '1' then
+                irqa2_next <= '0';
+            end if;
+    
+            --enable IRQB1 on CB1 transition when b0 = 1
+            if crb_reg(0) = '1' then
+                if cb1_in = '1' AND cb1_prev = '0' AND crb_reg(1) = '1' then
+                    irqb1_next <= '1';
+                elsif cb1_in = '0' AND cb1_prev = '1' AND crb_reg(1) = '0' then
+                    irqb1_next <= '1';
+                end if;
+            end if;
+    
+            --enable IRQB2 on CB2 transition (only for CB2 as input when b5 = 0)
+            if crb_reg(5) = '0' then 
+                if crb_reg(3) = '1' then
+                    if cb2 = '1' AND cb2_prev = '0' AND crb_reg(4) = '1' then
+                        irqb2_next <= '1';
+                    elsif cb2 = '0' AND cb2_prev = '1' AND crb_reg(4) = '0' then
+                        irqb2_next <= '1';
+                    end if;
+                end if;
+            elsif crb_reg(5) = '1' then
+                irqb2_next <= '0';
+            end if;
+        end if;
+    end process;
+    ```
 - Main functionality with data direction registers
   - Upon startup/reset, data registers are configured as data direction registers
   - Setting a bit of 1 anywhere in these 8-bit registers configures the bit as output, a 0 as input
@@ -332,12 +404,33 @@ _An example of writing, reading, and running a program in Wozmon_
             end if;
         ```
 
+### **RAM**
+- Implemented a simple 4K RAM module
+- Supports synchronous writes/asynchronous reads
+  - Our 6502 core expects data requested during a read cycle BEFORE the next rising edge... so reads MUST be asynchronous
+  - Alternative option: Process reads on the FALLING edge of the clock, still retrieve data before next rising edge, but synchronized = safer
+  - ```
+    process(clk)
+    begin
+        if ce = '1' then
+            if rising_edge(clk) then
+                if we = '1' then
+                    ram(to_integer(unsigned(addr(11 downto 0)))) <= data_in;
+                end if;
+            end if;
+            data_out <= ram(to_integer(unsigned(addr(11 downto 0))));
+        end if;
+    end process;
+    ```
+
 ## Project Results (Images & Videos)
 <img width="443" height="391" alt="image" src="https://github.com/user-attachments/assets/923331cb-abf4-461e-98d9-c483d06b944c" />
 
 Video Demonstration: https://youtu.be/3480DhZKkzs 
 
+## Team Summary
 
+### Responsibilities
 
 ## Team Summary
 
