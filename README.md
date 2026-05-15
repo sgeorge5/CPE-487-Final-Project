@@ -153,7 +153,14 @@ _An example of writing, reading, and running a program in Wozmon_
 
 ## Modifications & Implemntation
 
-- show the starter code githubs
+| Component | Source | Description|
+| -----------|--------|-------------|
+| **6502 CPU (`mx65.vhd`)** | [Steve-Teal/mx65](https://github.com/Steve-Teal/mx65) | Complete 6502 processor core that we used as is, focusing on integration with memory and I/O. |
+| **Wozmon ROM (`rom.vhd`)** | Apple-1 Manual (1976) | The original monitor program written by Steve Wozniak. We translated the published hex dump into a VHDL ROM array |
+| **Clock Wizard (`clk_wiz_0.vhd`, `clk_wiz_0_clk_wiz.vhd`)** | CPE 487 Lab 6 | Xilinx MMCM configuration that converts the 100 MHz board clock to 108 MHz for VGA timing. Used exactly as provided in the lab. |
+|
+|
+|
 
 ## Project Results (Images & Videos)
 
