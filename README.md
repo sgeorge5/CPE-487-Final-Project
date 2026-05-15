@@ -264,6 +264,9 @@ _An example of writing, reading, and running a program in Wozmon_
   - Used for timing purposes within shiftregister.vhd
 
 ## Project Results (Images & Videos)
+<img width="443" height="391" alt="image" src="https://github.com/user-attachments/assets/923331cb-abf4-461e-98d9-c483d06b944c" />
+
+Video Demonstration: https://youtu.be/3480DhZKkzs 
 
 ## Team Summary
 
