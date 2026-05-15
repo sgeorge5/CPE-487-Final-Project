@@ -51,6 +51,33 @@ Our Implemntation:
 
 ### Finite State Machines
 
+## Expected Behavior
+
+### Required Attachments
+
+- VGA cable or VGA → HDMI adapter (depending on your monitor)
+- Either a VGA‑compatible or HDMI‑compatible monitor
+- A laptop or keyboard
+- An application to send serial data to the Nexys‑A7 board (such as **Tera Term**)
+
+### System Operation
+
+- The Apple I VHDL implementation operates near‑identically to the original Apple I from 1967.
+- To ensure a clean slate upon first startup, **SW 1** and **SW 0** on the Nexys‑A7 board can be toggled to clear the screen and reset the system, respectively.
+- Typing in **Tera Term** should send data to the Apple I and ultimately to the display.
+- The implementation supports all original **Wozmon** commands from the base Apple I.
+
+### Basic Wozmon Commands
+
+_(XXXX and YYYY represent hexadecimal values of up to 4 bytes)_
+
+| Command            | Function                          |
+| ------------------ | --------------------------------- |
+| `XXXX`             | Examine contents at address       |
+| `XXXX.YYYY`        | Examine contents in address range |
+| `XXXX: YY YY YY …` | Edit contents starting at address |
+| `XXXXR`            | Run program starting at address   |
+
 ## Vivado Setup & Programming Instructions
 
 1. **Download all source files** (`.vhd`) and the constraint file (`.xdc`) from this repository.
