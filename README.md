@@ -176,7 +176,8 @@ _An example of writing, reading, and running a program in Wozmon_
 ### **Display Circuitry**
 - Consists of several files tied together in display_top.vhd
   - Line buffer module, pixel decode module, vga sync module, clk wiz module, shift register module, font rom package
-<img width="610" height="308" alt="Block-Diagram representation of display_top.vhd" src="https://github.com/user-attachments/assets/f6132e72-5c58-4c18-8858-3b240d2f1dc7" />
+  - **Block-Diagram representation of display_top.vhd**
+  - <img width="610" height="308" alt="Block-Diagram representation of display_top.vhd" src="https://github.com/user-attachments/assets/f6132e72-5c58-4c18-8858-3b240d2f1dc7" />
 - Shift Register Module
   - The “core” of the Apple I display circuitry
   - Closely models the original hardware
