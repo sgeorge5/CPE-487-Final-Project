@@ -226,19 +226,13 @@ _An example of writing, reading, and running a program in Wozmon_
 
 ### Responsibilities
 
-| Team Member      | Primary Responsibilities                                            | Technical Contributions                                                                 | Notes |
-| ---------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----- |
-| **Shaun George** | [UART & PIA Integration](ca://s?q=Explain_UART_and_PIA_integration) | - Implemented and debugged the UART receiver (`uart_protocol.vhd`, `shiftregister.vhd`) |
+## Team Summary
 
-- Integrated and tested the Motorola 6821 PIA (`6821_core.vhd`, `io_top.vhd`)
-- Assisted with debugging across CPU, memory, and display paths
-- Contributed heavily to the written report, README, and documentation | Focused on communication interfaces and overall system stability |
-  | **Miguel Hernandez** | [Memory & ROM/CPU Logic](ca://s?q=Explain_memory_and_ROM_CPU_logic) | - Helped design and verify RAM (`ram.vhd`) and ROM (`rom.vhd`) behavior
-- Ensured correct memory map alignment with the 6502 CPU
-- Assisted with Wozmon boot behavior and address decoding logic | Ensured the Apple‑I memory subsystem behaved like the original |
-  | **William Cronk** | [General Support & Remaining Tasks](ca://s?q=Explain_remaining_FPGA_tasks) | - Assisted with miscellaneous logic and integration tasks
-- Helped verify synthesis/implementation results
-- Supported VGA, CPU, and I/O debugging as needed | Filled in remaining project needs and supported team-wide testing |
+### Responsibilities
+
+| **Shaun George**                                                                                                                                                                                                                                                                  | **Miguel Hernandez**                                                                                                                                                                       | **William Cronk**                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Implemented and debugged the UART receiver (`uart_protocol.vhd`, `shiftregister.vhd`) and integrated the Motorola 6821 PIA (`6821_core.vhd`, `io_top.vhd`). Helped with debugging across CPU, memory, and display paths, and contributed to the written report and documentation. | Helped design and verify RAM (`ram.vhd`) and ROM (`rom.vhd`) behavior. Worked on memory map alignment with the 6502 CPU and assisted with Wozmon boot behavior and address decoding logic. | Assisted with miscellaneous logic and integration tasks. Helped verify synthesis and implementation results, supported VGA, CPU, and I/O debugging, and filled in remaining project needs. |
 
 ## Summary of Process
 
