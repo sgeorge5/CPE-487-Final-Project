@@ -451,6 +451,53 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
 
 ### Timeline
 
+#### 04/13/2026
+* Submitted the official project proposal for the Apple‑I FPGA implementation  
+* Began researching the Apple‑I architecture, including the 6502 CPU, PIA, shift‑register display, and Wozmon ROM
+
+#### 04/16/2026
+* Set up the Vivado project and created the initial file directory  
+* Imported the mx65 CPU core and reviewed integration requirements
+
+#### 04/20/2026
+* Began implementing CPU, RAM, and ROM connectivity  
+* Established the memory map and verified Wozmon ROM addressing
+
+#### 04/24/2026
+* Started working on the UART interface and PIA configuration  
+* Continued debugging early data‑flow issues
+
+#### 04/28/2026
+* Began configuring the shift‑register display logic  
+* Connected pixel_decode, linebuffer, and VGA timing modules
+
+#### 05/01/2026
+* Integrated major modules into apple_i_top  
+* Performed the first synthesis and implementation run in Vivado
+
+#### 05/04/2026
+* Continued debugging CPU, memory, and UART timing issues  
+* Achieved stable VGA output and visible character rendering
+
+#### 05/07/2026
+* Successfully booted Wozmon on hardware  
+* Verified basic monitor commands and memory access behavior
+
+#### 05/10/2026
+* Completed full system testing: UART → CPU → RAM → Display  
+* Ran sample 6502 programs through Wozmon for validation
+
+#### 05/12/2026
+* Presented the Apple‑I FPGA implementation in class poster session 
+* Demonstrated Wozmon operation, VGA output, and UART interaction
+
+#### 05/13/2026
+* Finalized debugging and cleaned up VHDL modules  
+* Completed writing and polishing the final project report
+
+#### 05/14/2026
+* Submitted the final report and finalized all project files
+
 ### Difficulties
 
 ### Future Works
