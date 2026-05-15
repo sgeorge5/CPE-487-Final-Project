@@ -158,11 +158,13 @@ _An example of writing, reading, and running a program in Wozmon_
 ## Modifications & Implemntation
 
 ### Non-modified / Base components
-| Component | Source | Description|
-| -----------|--------|-------------|
-| **6502 CPU (`mx65.vhd`)** | [Steve-Teal/mx65](https://github.com/Steve-Teal/mx65) | Complete 6502 processor core that we used as is, focusing on integration with memory and I/O. |
-| **Wozmon ROM (`rom.vhd`)** | Apple-1 Manual (1976) | The original monitor program written by Steve Wozniak. We translated the published hex dump into a VHDL ROM array |
-| **Clock Wizard (`clk_wiz_0.vhd`, `clk_wiz_0_clk_wiz.vhd`)** | CPE 487 Lab 6 | Xilinx MMCM configuration that converts the 100 MHz board clock to 108 MHz for VGA timing. Used exactly as provided in the lab. |
+
+| Component                                                   | Source                                                | Description                                                                                                                     |
+| ----------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **6502 CPU (`mx65.vhd`)**                                   | [Steve-Teal/mx65](https://github.com/Steve-Teal/mx65) | Complete 6502 processor core that we used as is, focusing on integration with memory and I/O.                                   |
+| **Wozmon ROM (`rom.vhd`)**                                  | Apple-1 Manual (1976)                                 | The original monitor program written by Steve Wozniak. We translated the published hex dump into a VHDL ROM array               |
+| **Clock Wizard (`clk_wiz_0.vhd`, `clk_wiz_0_clk_wiz.vhd`)** | CPE 487 Lab 6                                         | Xilinx MMCM configuration that converts the 100 MHz board clock to 108 MHz for VGA timing. Used exactly as provided in the lab. |
+
 |
 |
 |
@@ -172,6 +174,20 @@ _An example of writing, reading, and running a program in Wozmon_
 ## Team Summary
 
 ### Responsibilities
+
+| Team Member      | Primary Responsibilities                                            | Technical Contributions                                                                 | Notes |
+| ---------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----- |
+| **Shaun George** | [UART & PIA Integration](ca://s?q=Explain_UART_and_PIA_integration) | - Implemented and debugged the UART receiver (`uart_protocol.vhd`, `shiftregister.vhd`) |
+
+- Integrated and tested the Motorola 6821 PIA (`6821_core.vhd`, `io_top.vhd`)
+- Assisted with debugging across CPU, memory, and display paths
+- Contributed heavily to the written report, README, and documentation | Focused on communication interfaces and overall system stability |
+  | **Miguel Hernandez** | [Memory & ROM/CPU Logic](ca://s?q=Explain_memory_and_ROM_CPU_logic) | - Helped design and verify RAM (`ram.vhd`) and ROM (`rom.vhd`) behavior
+- Ensured correct memory map alignment with the 6502 CPU
+- Assisted with Wozmon boot behavior and address decoding logic | Ensured the Apple‑I memory subsystem behaved like the original |
+  | **William Cronk** | [General Support & Remaining Tasks](ca://s?q=Explain_remaining_FPGA_tasks) | - Assisted with miscellaneous logic and integration tasks
+- Helped verify synthesis/implementation results
+- Supported VGA, CPU, and I/O debugging as needed | Filled in remaining project needs and supported team-wide testing |
 
 ## Summary of Process
 
