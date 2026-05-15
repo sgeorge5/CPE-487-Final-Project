@@ -22,6 +22,10 @@ Our Implemntation:
 - Closely modeled behavior of the Apple I display circuitry + adjusted to interface with VGA protocol
 - Closely modeled behavior of the 6821 Peripheral Interface Adapter
 - Created a 4K RAM module to interface with the 6502 CPU
+
+<img width="371" height="272" alt="image" src="https://github.com/user-attachments/assets/2f2074ae-2aa9-4346-8e09-630a412b5337" />
+
+
 ## Required Hardware
 
 - **Digilent Nexys A7 FPGA Board**
