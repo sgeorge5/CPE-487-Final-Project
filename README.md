@@ -245,3 +245,25 @@ _An example of writing, reading, and running a program in Wozmon_
 ### Future Works
 
 ## File Structure
+### apple1-fpga/
+├── README.md
+├── apple_i_top.xdc # Pin constraints
+├── src/
+│ ├── apple_i_top.vhd # Top-level entity
+│ ├── mx65.vhd # 6502 CPU core
+│ ├── ram.vhd # 4KB RAM
+│ ├── rom.vhd # Wozmon ROM
+│ ├── 6821_core.vhd # MOS 6821 PIA
+│ ├── io_top.vhd # I/O top-level
+│ ├── uart_protocol.vhd # UART receiver
+│ ├── display_top.vhd # VGA display top-level
+│ ├── vga_sync.vhd # VGA timing generator
+│ ├── pixel_decode.vhd # Character → pixel converter
+│ ├── line_buffer.vhd # 40-character line buffer
+│ ├── dsp_shift_register.vhd # Screen buffer + scroll FSM
+│ ├── font_rom_pkg.vhd # Character font ROM
+│ ├── clk_wiz_0.vhd # Clock wizard wrapper
+│ └── clk_wiz_0_clk_wiz.vhd # MMCM primitive
+├── images/ # Screenshots and photos
+└── videos/ # Demo videos
+
