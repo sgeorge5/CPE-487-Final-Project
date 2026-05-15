@@ -78,7 +78,8 @@ _(XXXX and YYYY represent hexadecimal values of up to 4 bytes)_
 | `XXXX: YY YY YY …` | Edit contents starting at address |
 | `XXXXR`            | Run program starting at address   |
 
-![An example of writing, reading, and running a program in Wozmon](wozmonss.png)
+<img src="wozmonss.png" alt="An example of writing, reading, and running a program in Wozmon" width="500">
+
 _An example of writing, reading, and running a program in Wozmon_
 
 - Display should automatically scroll upwards once text reaches the bottom of the screen.
@@ -124,7 +125,7 @@ _An example of writing, reading, and running a program in Wozmon_
 - Follow the steps in the installation wizard.
 - Open **Tera Term** and select **Serial connection**, setting it to the COM port that matches your Nexys A7 board.
 
-![Serial Port Setup](serialport.png)
+<img src="serialport.png" alt="Serial Port Setup" width="400">
 
 - Go to **Setup → Serial Port** and configure:
   - Speed = 9600
