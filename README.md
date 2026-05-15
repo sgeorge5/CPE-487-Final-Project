@@ -88,6 +88,8 @@ Our Implemntation:
 ### Responsibilities
 
 ## Summary of Process
+<img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
+
 
 ### Timeline
 
