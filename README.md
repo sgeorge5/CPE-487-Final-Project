@@ -492,6 +492,10 @@ Video Demonstration: https://youtu.be/3480DhZKkzs
     - Can find logical flaws that are hard to debug by inspection 
 
 ## File Structure
-<img width="316" height="488" alt="image" src="https://github.com/user-attachments/assets/ffd94137-6545-4532-bab2-44f9efb61c2d" />
+<img width="313" height="265" alt="image" src="https://github.com/user-attachments/assets/4021a148-7ccd-45b9-84db-4d410e325362" />
+<img width="128" height="53" alt="image" src="https://github.com/user-attachments/assets/6cebb9e0-eae7-43d8-901d-138b962af622" />
+<img width="337" height="278" alt="image" src="https://github.com/user-attachments/assets/e7f0722b-b07b-4252-9e07-426595f85343" />
+
+
 
 <img width="8" height="7" alt="image" src="https://github.com/user-attachments/assets/0e31f445-548b-4aeb-89e1-b2029a1a78be" />
