@@ -157,7 +157,7 @@ _An example of writing, reading, and running a program in Wozmon_
 
 ## Modifications & Implemntation
 
-###Non-modified / Base components
+### Non-modified / Base components
 | Component | Source | Description|
 | -----------|--------|-------------|
 | **6502 CPU (`mx65.vhd`)** | [Steve-Teal/mx65](https://github.com/Steve-Teal/mx65) | Complete 6502 processor core that we used as is, focusing on integration with memory and I/O. |
